@@ -1,0 +1,39 @@
+# Linux
+*.sh text eol=lf
+*.screen text eol=lf
+
+# Windows
+*.ps1 text eol=crlf
+
+# Build outputs
+*.out binary
+*.exe binary
+*.so binary
+*.dll binary
+*.abcl binary
+*.fasl binary
+*.dx32fsl binary
+*.dx64fsl binary
+*.lx32fsl binary
+*.lx64fsl binary
+*.x86f binary
+/target/bin/nrdl binary
+
+# Lisp
+*.lisp text
+*.asd text
+*.lock text
+qlfile text
+
+# C
+*.h text
+*.c text
+
+# Images
+*.png binary
+*.jpg binary
+
+# Misc
+*.md text
+.gitignore text
+Makefile text

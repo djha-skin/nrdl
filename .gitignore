@@ -1,73 +1,25 @@
-# ---> CommonLisp
-*.FASL
+# Build outputs
+/target/*
+*.abcl
 *.fasl
-*.lisp-temp
-*.dfsl
-*.pfsl
-*.d64fsl
-*.p64fsl
-*.lx64fsl
-*.lx32fsl
-*.dx64fsl
 *.dx32fsl
-*.fx64fsl
-*.fx32fsl
-*.sx64fsl
-*.sx32fsl
-*.wx64fsl
-*.wx32fsl
-
-# ---> C
-# Prerequisites
-*.d
-
-# Object files
-*.o
-*.ko
-*.obj
-*.elf
-
-# Linker output
-*.ilk
-*.map
-*.exp
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
-
-# Shared objects (inc. Windows DLLs)
-*.dll
+*.dx64fsl
+*.lx32fsl
+*.lx64fsl
+*.x86f
 *.so
-*.so.*
-*.dylib
-
-# Executables
+*.dll
 *.exe
-*.out
-*.app
-*.i*86
-*.x86_64
-*.hex
 
-# Debug files
-*.dSYM/
-*.su
-*.idb
-*.pdb
+# Editor save files, bookkeeping files
+*~
+.#*
+\#*
+.*#
+.*.sw[a-z]
+/.slime_paste
 
-# Kernel Module Compile Results
-*.mod*
-*.cmd
-.tmp_versions/
-modules.order
-Module.symvers
-Mkfile.old
-dkms.conf
-
+# Lisp stuff
+/.repl/ros_history
+/.qlot/
+/.bundle-libs/
