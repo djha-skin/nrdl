@@ -99,6 +99,7 @@ pleasing to the eye.
 
 ### Advantages
 
+  - Superset of JSON
   - Easy to learn for users, with familiar syntax that matches what is used
     elsewhere
   - Easy enough to read that it is usable as a configuration language
@@ -111,19 +112,22 @@ pleasing to the eye.
     formatting and navigation. This is especially helpful when documeents become
     large.
   - Symbols as a data type is introduced, allowing for easier parsing in typed
-    languages and keyword representation in Lisps and others
+    languages and keyword/symbol representation in Lisps and others
 
 ### Disadvantages
 
-  - Being a superset of JSON, many of the same disadvantages carry over
-  - If a NRDL document is slurped in, it cannot be printed out again and still
-    have it be the same as it was before. This is because order of the keys in
-    various often lost in the parsing process, as are comments.
-  - Infinity and NaN are not defined.
+  - Superset of JSON
+    - Being a superset of JSON, many of the same disadvantages carry over
+    - If a NRDL document is slurped in, it cannot be printed out again and still
+      have it be the same as it was before. This is because order of the keys in
+      various often lost in the parsing process, as are comments.
+    - Care must be taken when desigining APIs because order is not guaranteed in
+      objects.
+    - Infinity and NaN are not defined.
 
 ## Overview
 
-NRDL is (mostly) a superset of JSON  (but duplicate keys are not allowed).
+NRDL is a superset of JSON.
 
 There are specific additions to JSON that NRDL makes that are worth pointing
 out.
@@ -134,7 +138,7 @@ To please the eye, NRDL uses whitespace as a separator. However, it does not
 use it as a signal of structure. The presence of whitespace is used to separate
 keys and values, but indentation doesn't mean anything. For backwards
 compatibility with JSON, the colon `:` and comma `,` are considered whitespace
-characters outside of strings. braces and brackets are still used to delimit
+characters outside of strings. Braces and brackets are still used to delimit
 arrays and objects. Objects must have an even-numbered number of values in it,
 with every other value being keys and their complements being values. Keys can
 be any type.
