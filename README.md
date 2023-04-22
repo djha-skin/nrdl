@@ -3,10 +3,83 @@
 This repository houses the nestable readable document language.
 
 ## Example Document
+
+
+```nrdl
+# What now brown cow
+{
+
+   the-wind "bullseye"
+   the-trees false
+   the-sparrows his-eye
+   poem
+    # I don't know if you can hear me
+      |His eye
+    # or if
+    # you're even there
+      |is on
+    # I don't know if you can listen
+      |The sparrow
+      ^
+
+    # to a gypsy's prayer
+
+   this-should-still-work 15.0
+
+   other
+      |And I know
+      |He's watching
+      |Over me
+      ^
+
+   'force push' >I sing
+                >because
+                >I'm happy
+                ^
+   "I am sysadmin" true
+   "I am webadmin" false
+   "you are so wrong" null
+    wendover [
+        {
+          so 1
+          much -10
+          gambling 100
+          but 1000
+          also -1000
+          apparently 10000
+          paramedics -10000
+          and 1.01
+        }
+        {
+          die in
+          a fire
+        }
+        15
+
+        |this
+        |that
+        ^
+
+        >Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+        >eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
+        >ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+        >aliquip ex ea commodo consequat. Duis aute irure dolor in
+        >reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+        >pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+        >culpa qui officia deserunt mollit anim id est laborum."
+        ^
+      ]
+}
+
+
+
+
+```
+
 ## Rationale
 
-This is a language I made up because I am writing a [command line tool
-framework][1] and I need a language for it to both read configuration from and
+This is a language I made up because I am writing a command line tool
+framework and I need a language for it to both read configuration from and
 use also to write its output to standard output.
 
 Normally, YAML would be perfect for this; however, in Common Lisp, YAML means
@@ -15,8 +88,8 @@ language myself.
 
 I needed a language that has nestable documents and also have the language be
 pleasing to the eye, like you can do in YAML. However, I didn't want to spend
-too much time writing a document parser and printer. YAML is [very
-complicated][2]. I didn't need a lot of its features.
+too much time writing a document parser and printer. YAML is very
+complicated. I didn't need a lot of its features.
 
 So I wrote NRDL. Nestable, because you can have nestable documents in it.
 Readable, because it's easy both to parse mechanically and is (or can be)
@@ -262,16 +335,16 @@ keys.
 
 ```
 
-value = string
-      / number
-      / array
-      / object
-
-NRDL-text =
-             *( sep )
+NRDL-text = *( sep )
              value
 
 ; String section
+
+value = string
+      / symbol
+      / number
+      / array
+      / object
 
 object = begin-object
           *sep
@@ -312,20 +385,15 @@ frac = decimal-point
 int = zero
     / ( digit1-9
         *digit )
-zero = %x30             ; 0
-one = %x31 ; 
+zero = %x30 ; 0
+one = %x31  ;
 
-; String section
+string = quoted-string
+     / prose-string
+     / verbatim-string
 
-string = symbol
-       / blob
-
-blob = quoted-blob
-     / prose-blob
-     / verbatim-blob
-
-quoted-blob = double-quote
-              1*char
+quoted-string = double-quote
+              *char
               double-quote
 
 char = unescaped
@@ -346,7 +414,7 @@ unescaped = %x20-21         ; all
 
 ; Prose section
 
-prose-blob = prose-line *( sep prose-line ) *sep caret
+prose-string = prose-line *( sep prose-line ) *sep caret
 
 prose-line = prose-mark
              line-content
@@ -355,7 +423,7 @@ prose-mark = greater-than
 
 ; Verbatim section
 
-verbatim-blob = verbatim-line *( sep verbatim-line ) *sep caret
+verbatim-string = verbatim-line *( sep verbatim-line ) *sep caret
 
 verbatim-line = verbatim-mark
                 line-content
@@ -367,7 +435,7 @@ symbol = bareword
         / quoted-symbol
 
 quoted-symbol = single-quote
-               *symchar
+                1*symchar
                 single-quote
 
 symchar = single-unescaped
