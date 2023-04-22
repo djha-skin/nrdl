@@ -335,6 +335,12 @@ equivalent, and should be treated the same as each other. The same goes for
 Symbols can be used as keys or values, but they are especially useful as object
 keys.
 
+## Contact Me
+
+I am `skin` on the `#lisp` IRC channel on libera.chat and elsewhere. I will
+maintain an IRC channel on that server, `#nrdl`, where people can come and ask
+questions.
+
 ## ABNF
 
 ```
