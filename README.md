@@ -99,31 +99,34 @@ pleasing to the eye.
 
 ### Advantages
 
-  - Superset of JSON
   - Easy to learn for users, with familiar syntax that matches what is used
-    elsewhere
+    elsewhere.
   - Easy enough to read that it is usable as a configuration language
   - Very easy to parse for implementers, requiring only single-character
     lookahead.
   - Documents can be nested in other documents without changing their content or
-    adding a bunch of backslashes everywhere, just like YAML
-  - Comments work the same as YAML
+    adding a bunch of backslashes everywhere, just like YAML.
+  - Comments work the same as YAML.
   - Unlike YAML, it is syntactically specified. This allows editors to help with
     formatting and navigation. This is especially helpful when documeents become
     large.
   - Symbols as a data type is introduced, allowing for easier parsing in typed
-    languages and keyword/symbol representation in Lisps and others
+    languages and keyword/symbol representation in Lisps and others.
 
-### Disadvantages
+### Caveats
 
-  - Superset of JSON
-    - Being a superset of JSON, many of the same disadvantages carry over
-    - If a NRDL document is slurped in, it cannot be printed out again and still
-      have it be the same as it was before. This is because order of the keys in
-      various often lost in the parsing process, as are comments.
-    - Care must be taken when desigining APIs because order is not guaranteed in
-      objects.
-    - Infinity and NaN are not defined.
+  - Many of the same disadvantages carry over from JSON.
+  - If a NRDL document is slurped in, it cannot be printed out again and still
+    have it be the same as it was before. This is because order of the keys in
+    various often lost in the parsing process, as are comments.
+  - Care must be taken when desigining APIs because order is not guaranteed in
+    objects.
+  - Infinity and NaN are not defined.
+  - Single quotes and double quotes are both used in the language, but do not
+    mean the same thing and are not interchangeable.
+  - Prose doesn't compress multiple whitespace characters at the end of the line
+    into one character, as YAML does. This is to ease parsing and keep the
+    language simple.
 
 ## Overview
 
@@ -319,7 +322,7 @@ the following guidelines:
         of constants. This category includes such languages as C, C++, Java,
         Golang, Rust, and Zig.
       - Languages with a concept of a keyword datatype should decode NRDL
-        symbols as datatypes. This includes such languages as Common Lisp,
+        symbols as keywords. This includes such languages as Common Lisp,
         Clojure, Janet, Elixir, and Ruby.
       - Languages with the concept of a symbol as a datatype but not keywords
         should decode NRDL symbols as symbols. This includes members of the
