@@ -335,6 +335,10 @@ equivalent, and should be treated the same as each other. The same goes for
 Symbols can be used as keys or values, but they are especially useful as object
 keys.
 
+## Supporting Resources
+
+Check out the [vim NRDL plugin](https://git.djha.skin/me/vim-nrdl.git).
+
 ## Contact Me
 
 I am `skin` on the `#lisp` IRC channel on libera.chat and elsewhere. I will
