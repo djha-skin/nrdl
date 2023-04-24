@@ -16,6 +16,8 @@
       generate-to
       nested-to-alist
       false
+      string-keyword
+      symbol-string
       *symbol-deserialize-case*
       *symbol-serialize-case*))
 (in-package #:nrdl)
