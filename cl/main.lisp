@@ -13,7 +13,11 @@
     (:import-from #:alexandria)
     (:export
       parse-from
-      generate-to))
+      generate-to
+      nested-to-alist
+      false
+      *symbol-deserialize-case*
+      *symbol-serialize-case*))
 (in-package #:nrdl)
 
 ; EOT, End Of Transmission, according to ASCII
@@ -95,7 +99,7 @@
           (if (char= last-read #\\)
             (progn
               (setf last-read (must-read-chr strm))
-              (cond last-read
+              (cond
                     ((char= last-read quote-char)
                      (push quote-char building))
                     ((char= last-read #\\)
@@ -103,7 +107,7 @@
                     ((char= last-read #\/)
                      (push last-read building))
                     ((char= last-read #\b)
-                     (push #\Backspace building)
+                     (push #\Backspace building))
                      ((char= last-read #\f)
                       (push #\Page building))
                      ((char= last-read #\n)
@@ -116,16 +120,16 @@
                       (push
                         (code-char
                           (let ((build-ordinal (make-string 6)))
-                            (setf (elt  build-ordinal 0 #\#))
-                            (setf (elt build-ordinal 1 #\X))
-                            (setf (elt (build-ordinal 2 (must-read-chr strm))))
-                            (setf (elt (build-ordinal 3 (must-read-chr strm))))
-                            (setf (elt (build-ordinal 4 (must-read-chr strm))))
-                            (setf (elt (build-ordinal 5 (must-read-chr strm))))
+                            (setf (elt build-ordinal 0) #\#)
+                            (setf (elt build-ordinal 1) #\X)
+                            (setf (elt build-ordinal 2) (must-read-chr strm))
+                            (setf (elt build-ordinal 3) (must-read-chr strm))
+                            (setf (elt build-ordinal 4) (must-read-chr strm))
+                            (setf (elt build-ordinal 5) (must-read-chr strm))
                             (read-from-string build-ordinal nil nil)))
                         building))
                      (t (error "Unknown escape char: ~A"
-                               last-read)))))
+                               last-read))))
             (push last-read building))
           (setf last-read (must-read-chr strm)))
     (build-string building)))
@@ -156,7 +160,7 @@
       (char= chr #\:)))
 
 (defun guarded-sepchar-p (chr)
-  (declare (type character chr))
+  (declare (type (or null character) chr))
     (unless (null chr)
       (sepchar-p chr)))
 
@@ -165,9 +169,8 @@
     (unless (null chr)
       (blankspace-p chr)))
 
-(defun extract-comment (strm chr)
-  (declare (type (or boolean stream) strm)
-           (type character chr))
+(defun extract-comment (strm)
+  (declare (type (or boolean stream) strm))
   (loop with last-read = (read-chr strm)
         while (and
                 (not (char= last-read +eof+))
@@ -186,7 +189,7 @@
     do
     (cond
       ((char= next +start-comment+)
-       (setf just-read (extract-comment strm next)))
+       (setf just-read (extract-comment strm)))
       ((funcall pred next)
        (setf just-read (must-read-chr strm)))
       (t
@@ -416,7 +419,7 @@
 
 (defparameter false nil)
 
-(defun convert-to-property (final-string)
+(defun convert-to-symbol (final-string)
   (declare (type string final-string))
   (cond ((string= final-string "t")
                   t)
@@ -430,7 +433,7 @@
          nil)
         (t (string-keyword final-string))))
 
-(defun extract-bare-property (strm chr)
+(defun extract-bare-symbol (strm chr)
   (declare (type (or boolean stream) strm)
            (type character chr))
   (loop with building = nil
@@ -443,12 +446,12 @@
         (setf next (peek-chr strm))
         finally
         (return
-          (convert-to-property (build-string building)))))
+          (convert-to-symbol (build-string building)))))
 
-(defun extract-quoted-property (strm chr)
+(defun extract-quoted-symbol (strm chr)
   (declare (type (or boolean stream) strm)
            (type character chr))
-  (convert-to-property
+  (convert-to-symbol
     (extract-quoted strm chr #\')))
 
 (defun extract-value (strm chr)
@@ -462,7 +465,7 @@
         ((char= chr #\")
          (extract-quoted-blob strm chr))
         ((char= chr #\')
-         (extract-quoted-property strm chr))
+         (extract-quoted-symbol strm chr))
         ((or
            (char= chr +start-verbatim+)
            (char= chr +start-prose+))
@@ -470,7 +473,7 @@
         ((number-start-p chr)
          (extract-number strm chr))
         ((bareword-start-p chr)
-         (extract-bare-property strm chr))
+         (extract-bare-symbol strm chr))
         (t (error "Invalid token starting with character `~A`"
                   chr))))
 
@@ -542,7 +545,7 @@
                   (reverse building)
                   :test #'equal))))
 #|
-(parse-from t)
+(nrdl:parse-from t)
 # What now brown cow
 {
 
@@ -610,9 +613,8 @@
 |#
 (defun parse-from (strm)
   (declare (type (or boolean stream) strm))
-  (let ((last-read (extract-list-sep strm (peek-chr strm)))
-        (next (peek-chr strm)))
-    (extract-value strm next)))
+  (extract-list-sep strm (peek-chr strm))
+  (extract-value strm (peek-chr strm)))
 
 
 
@@ -641,14 +643,13 @@
 
 (defun to-surrogates (chr)
   (declare (type character chr))
-  (let* ((subject #x10E6d)
-
+  (let* ((subject (char-code chr))
       (residue (- subject #x10000))
       (higher (prog1 (write (ash residue -10) :base 16) (terpri)))
       (lower (prog1 (write (logand #x003ff residue) :base 16) (terpri))))
       (list
-        (+ #xD800 higher))
-        (+ #xDc00 lower)))
+        (+ #xD800 higher)
+        (+ #xDc00 lower))))
 #|
 (inject-quoted
   t
@@ -744,7 +745,7 @@
            (ignore max-width))
   (position #\Newline blob))
 
-(defun break-up-blob (max-width blob &optional (next-spot #'blob-break-spot))
+(defun break-up-blob (max-width blob next-spot)
   (declare (type (integer 0 1024) max-width)
            (type string blob)
            (type function next-spot))
@@ -771,14 +772,17 @@
               (push consumed chunks))
             (return (reverse chunks))))))
 
+(defun inject-linesep (strm)
+  (write-char #\Newline strm))
+
 (defun inject-sep (strm indented-at)
   (declare (type (or boolean stream) strm)
            (type (or null (integer 0 1024)) indented-at))
   (if (null indented-at)
     (write-char #\Space strm)
     (progn
-      (terpri strm)
-      (loop for i from 0 to indented-at
+      (inject-linesep strm)
+      (loop for i from 1 to indented-at
             do
             (write-char #\Space strm)))))
 
@@ -801,7 +805,7 @@
       doc-width)))
 
 (defun determine-blob-form (blob line-width)
-  (declare (type (string blob))
+  (declare (type string blob)
            (type (or null (integer 0 1024)) line-width))
   (if (null line-width)
     :quoted
@@ -817,7 +821,7 @@
   (strm blob indented-at line-width prefix-char next-spot)
   (declare (type (or boolean stream) strm)
            (type string blob)
-           (type string indent)
+           (type (integer 0 1024) indented-at)
            (type (integer 0 1024) line-width)
            (type character prefix-char)
            (type function next-spot))
@@ -830,13 +834,13 @@
               (write-char prefix-char strm)
               (write-string str strm)
               (inject-sep strm indented-at))
-        (write-char #\^))
+        (write-char #\^ strm))
 
 (defun inject-blob (strm blob indented-at
                          &key
                          line-width-args)
   (declare (type (or boolean stream) strm)
-           (type (string blob))
+           (type string blob)
            (type (or null (integer 0 1024)) indented-at)
            (type list line-width-args))
   (let* ((line-suggested-width (apply
@@ -874,9 +878,8 @@
     (unprintable-p chr)
     (char= chr quote-char)))
 
-(defun inject-property-content (strm prop-content)
-  (declare (type character chr)
-           (type string prop-content))
+(defun inject-symbol-content (strm prop-content)
+  (declare (type string prop-content))
   (if (> (count-if (lambda (x)
                      (or
                        (char= x #\Space)
@@ -885,38 +888,28 @@
     (inject-quoted strm prop-content #\')
     (write-string prop-content strm)))
 #|
-(inject-property t :argyle)
+(inject-symbol t :argyle)
 => [prints `argyle`]
-(inject-property t 'terrifying)
+(inject-symbol t 'terrifying)
 => [throws error, no symbols plz]
-(inject-property t 15)
+(inject-symbol t 15)
 => [throws error, no numbers plz]
-(inject-property t 't)
+(inject-symbol t 't)
 => [prints `true`]
-(inject-property t :|a b c|)
+(inject-symbol t :|a b c|)
 => [prints `'a b c'`]
 
 |#
-(defun inject-property (strm prop)
-  (declare (type character chr)
+(defun inject-symbol (strm prop)
+  (declare (type (or boolean stream) strm)
            (type (or null boolean symbol) prop))
   (typecase prop
     (null (write-string "null" strm))
     (boolean (write-string "true" strm))
-    (keyword (inject-property-content strm (symbol-string prop)))
+    (keyword (inject-symbol-content strm (symbol-string prop)))
     (symbol (cond ((eql prop 'false)
                    (write-string "false" strm))
-                  ((eql prop 't)
-                   (write-string "true" strm))
-                  ((eql prop  'nil)
-                   (write-string "null" strm))
-                  (t (error "Writing symbols to PCL is undefined"))))
-    (t (error "wrong type of thing given to inject property for thing `~A`."
-              prop))))
-
-;; Numbers are hard, punt on this
-(defun inject-number (strm num)
-  (prin1 num strm))
+                  (t (error "Writing symbols to PCL is undefined"))))))
 
 (defun inject-array (strm seq pretty-indent indented-at)
   (let ((array-indent (when (not (null pretty-indent))
@@ -970,9 +963,9 @@
 (defun inject-value (strm val pretty-indent indented-at)
   (declare (type (or boolean stream) strm)
            (type (or null (integer 0 64)) pretty-indent)
-           (type (or null (integer 0 1024) indented-at)))
+           (type (or null (integer 0 1024)) indented-at))
   (typecase val
-    ((or null boolean symbol) (inject-property strm val))
+    ((or null boolean symbol) (inject-symbol strm val))
     (number (inject-number strm val))
     (string (inject-blob strm val indented-at))
     (hash-table (inject-object strm val pretty-indent indented-at))
@@ -984,3 +977,21 @@
            (type (or null (integer 0 64)) pretty-indent))
   (inject-value strm val pretty-indent 0))
 
+(defun nested-to-alist
+  (value)
+  "
+  Recursively changes value, converting all hash tables within the tree to an
+  alist.
+  "
+  (cond
+    ((listp value)
+     (map 'list #'nested-to-alist value))
+    ((hash-table-p value)
+     (let ((coll
+       (loop for k being the hash-key of value
+           using (hash-value v)
+           collect (cons k (nested-to-alist v)))))
+       (stable-sort coll #'string< :key (lambda (thing)
+                                          (format nil "~A" (car thing))))))
+    (t
+      value)))
