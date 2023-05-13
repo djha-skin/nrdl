@@ -15,7 +15,6 @@
       parse-from
       generate-to
       nested-to-alist
-      false
       string-keyword
       symbol-string
       *symbol-deserialize-case*
@@ -419,20 +418,18 @@
     (char= chr #\.)
     (char= chr #\-)))
 
-(defparameter false nil)
-
 (defun convert-to-symbol (final-string)
   (declare (type string final-string))
   (cond ((string= final-string "t")
                   t)
         ((string= final-string "nil")
-         nil)
+         'cl:null)
         ((string= final-string "true")
          t)
         ((string= final-string "false")
-         'false)
-        ((string= final-string "null")
          nil)
+        ((string= final-string "null")
+         'cl:null)
         (t (string-keyword final-string))))
 
 (defun extract-bare-symbol (strm chr)
@@ -906,21 +903,23 @@
   (declare (type (or boolean stream) strm)
            (type (or null boolean symbol) prop))
   (typecase prop
-    (null (write-string "null" strm))
+    (null (write-string "false" strm))
     (boolean (write-string "true" strm))
     (keyword (inject-symbol-content strm (symbol-string prop)))
     (symbol (cond ((eql prop 'false)
                    (write-string "false" strm))
-                  (t (error "Writing symbols to PCL is undefined"))))))
+                  ((eql prop 'cl:null)
+                        (write-string "null" strm))
+                  (t (error "Writing symbols to NRDL is undefined"))))))
 
 (defun inject-array (strm seq pretty-indent indented-at)
   (let ((array-indent (when (not (null pretty-indent))
                            (+ indented-at pretty-indent))))
     (write-char #\[ strm)
-    (loop for v in seq
-          do
+    (map nil (lambda (v)
           (inject-sep strm array-indent)
-          (inject-value strm v pretty-indent array-indent)))
+          (inject-value strm v pretty-indent array-indent))
+         seq))
   (inject-sep strm indented-at)
   (write-char #\] strm))
 
