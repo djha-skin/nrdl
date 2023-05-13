@@ -120,14 +120,14 @@
                        ")
                      (nrdl:parse-from strm)))
 '((:|FORCE PUSH| . "I sing because I'm happy")
- ("I am web mistress ming" . NRDL:FALSE)
+ ("I am web mistress ming" . nil)
  (:OTHER . "And I know
 He's watching
 Over me")
  (:POEM . "His eyee
 is on
 The sparrow")
- (:THE-SPARROWS . :HIS-EYE) (:THE-TREES . NRDL:FALSE) (:THE-WIND . "bullseye")
+ (:THE-SPARROWS . :HIS-EYE) (:THE-TREES . nil) (:THE-WIND . "bullseye")
  (:THIS-SHOULD-STILL-WORK . 15.0)
  (:WENDOVER
   ((:ALSO . -1000) (:AND . 1.01) (:APPARENTLY . 10000) (:BUT . 1000)
@@ -136,7 +136,7 @@ The sparrow")
 that"
 "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
   )
- ("i am mordac" . T) ("you are so wrong"))
+ ("i am mordac" . T) ("you are so wrong" . 'cl:null))
 )
  )))
 
@@ -150,8 +150,8 @@ that"
                           `((:a . 1)
                             (:b . (:x :y :z))
                             (:c . ("food" "for" "thought"))
-                            (:d . ,nil)
-                            (:e . nrdl:false)
+                            (:d . cl:null)
+                            (:e . ,nil)
                             (:f . t)
                             (:g . 0.87)))
                         :pretty-indent 4
@@ -169,9 +169,6 @@ that"
     \"f\": true,
     \"g\": 0.87
 }"))))
-
-
-        sparrow 4))
 
 
 (deftest

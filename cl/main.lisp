@@ -505,7 +505,7 @@
                   (read-chr strm))
                   (return (reverse building)))))
 
-(defun extract-hash (strm chr &key json-mode)
+(defun extract-hash (strm chr)
   (declare (type (or boolean stream) strm)
            (type character chr)
            (ignore chr))
@@ -522,10 +522,7 @@
           (error
             "No separating whitespace found at character `~A`."
             next))
-        (if json-mode
-          (push (convert-to-symbol
-                  (extract-quoted strm chr #\")) building)
-          (push (extract-value strm next) building))
+        (push (extract-value strm next) building)
         (setf last-read (extract-list-sep strm (peek-chr strm)))
         (setf found-sep (guarded-sepchar-p last-read))
         (setf next (peek-chr strm))
@@ -613,10 +610,10 @@
 
 
 |#
-(defun parse-from (strm &key json-mode)
+(defun parse-from (strm)
   (declare (type (or boolean stream) strm))
   (extract-list-sep strm (peek-chr strm))
-  (extract-value strm (peek-chr strm) :json-mode json-mode))
+  (extract-value strm (peek-chr strm)))
 
 
 
@@ -817,7 +814,9 @@
     (cond
       ((> (count #\Newline blob) 0)
        :verbatim)
-      ((> (length blob) line-width)
+      ((and
+         (> (length blob) line-width)
+         (> (count #\Space blob) 0))
        :prose)
       (t
         :quoted))))
@@ -923,9 +922,7 @@
                strm
                (symbol-string prop)
                :json-mode json-mode))
-    (symbol (cond ((eql prop 'false)
-                   (write-string "false" strm))
-                  ((eql prop 'cl:null)
+    (symbol (cond ((eql (print prop) 'cl:null)
                         (write-string "null" strm))
                   (t (error "Writing symbols to NRDL is undefined"))))))
 
