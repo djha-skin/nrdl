@@ -508,7 +508,7 @@
                   (read-chr strm))
                   (return (reverse building)))))
 
-(defun extract-hash (strm chr)
+(defun extract-hash (strm chr &key json-mode)
   (declare (type (or boolean stream) strm)
            (type character chr)
            (ignore chr))
@@ -525,7 +525,10 @@
           (error
             "No separating whitespace found at character `~A`."
             next))
-        (push (extract-value strm next) building)
+        (if json-mode
+          (push (convert-to-symbol
+                  (extract-quoted strm chr #\")) building)
+          (push (extract-value strm next) building))
         (setf last-read (extract-list-sep strm (peek-chr strm)))
         (setf found-sep (guarded-sepchar-p last-read))
         (setf next (peek-chr strm))
@@ -613,10 +616,10 @@
 
 
 |#
-(defun parse-from (strm)
+(defun parse-from (strm &key json-mode)
   (declare (type (or boolean stream) strm))
   (extract-list-sep strm (peek-chr strm))
-  (extract-value strm (peek-chr strm)))
+  (extract-value strm (peek-chr strm) :json-mode json-mode))
 
 
 
@@ -777,11 +780,13 @@
 (defun inject-linesep (strm)
   (write-char #\Newline strm))
 
-(defun inject-sep (strm indented-at)
-  (declare (type (or boolean stream) strm)
+(defun inject-sep (strm indented-at &key json-mode)
+  (declare (type boolean json-mode)
+           (type (or boolean stream) strm)
            (type (or null (integer 0 1024)) indented-at))
   (if (null indented-at)
-    (write-char #\Space strm)
+    (when (not json-mode)
+      (write-char #\Space strm))
     (progn
       (inject-linesep strm)
       (loop for i from 1 to indented-at
@@ -806,10 +811,11 @@
         break-min-width)
       doc-width)))
 
-(defun determine-blob-form (blob line-width)
+(defun determine-blob-form (blob line-width json-mode)
   (declare (type string blob)
            (type (or null (integer 0 1024)) line-width))
-  (if (null line-width)
+  (if (or json-mode
+          (null line-width))
     :quoted
     (cond
       ((> (count #\Newline blob) 0)
@@ -840,15 +846,17 @@
 
 (defun inject-blob (strm blob indented-at
                          &key
+                         json-mode
                          line-width-args)
   (declare (type (or boolean stream) strm)
            (type string blob)
            (type (or null (integer 0 1024)) indented-at)
+           (type boolean json-mode)
            (type list line-width-args))
   (let* ((line-suggested-width (apply
                                  #'suggest-line-width
                                  (cons indented-at line-width-args)))
-         (dispatch (determine-blob-form blob line-suggested-width)))
+         (dispatch (determine-blob-form blob line-suggested-width json-mode)))
     (if (eql dispatch :quoted)
       (inject-quoted
         strm
@@ -880,15 +888,19 @@
     (unprintable-p chr)
     (char= chr quote-char)))
 
-(defun inject-symbol-content (strm prop-content)
-  (declare (type string prop-content))
-  (if (> (count-if (lambda (x)
-                     (or
-                       (char= x #\Space)
-                       (escapable-p x #\')))
-                   prop-content) 0)
-    (inject-quoted strm prop-content #\')
-    (write-string prop-content strm)))
+(defun inject-symbol-content (strm prop-content &key json-mode)
+  (declare (type string prop-content)
+           (type boolean json-mode))
+  (if json-mode
+    (inject-quoted strm prop-content #\")
+
+    (if (> (count-if (lambda (x)
+                       (or
+                         (char= x #\Space)
+                         (escapable-p x #\')))
+                     prop-content) 0)
+      (inject-quoted strm prop-content #\')
+      (write-string prop-content strm))))
 #|
 (inject-symbol t :argyle)
 => [prints `argyle`]
@@ -902,29 +914,42 @@
 => [prints `'a b c'`]
 
 |#
-(defun inject-symbol (strm prop)
+(defun inject-symbol (strm prop &key json-mode)
   (declare (type (or boolean stream) strm)
-           (type (or null boolean symbol) prop))
+           (type (or null boolean symbol) prop)
+           (type boolean json-mode))
+
   (typecase prop
     (null (write-string "null" strm))
     (boolean (write-string "true" strm))
-    (keyword (inject-symbol-content strm (symbol-string prop)))
+    (keyword (inject-symbol-content
+               strm
+               (symbol-string prop)
+               :json-mode json-mode))
     (symbol (cond ((eql prop 'false)
                    (write-string "false" strm))
-                  (t (error "Writing symbols to PCL is undefined"))))))
+                  (t (error "Writing symbols to NRDL is undefined"))))))
 
-(defun inject-array (strm seq pretty-indent indented-at)
+(defun inject-array (strm seq pretty-indent indented-at
+                          &key json-mode)
   (let ((array-indent (when (not (null pretty-indent))
                            (+ indented-at pretty-indent))))
     (write-char #\[ strm)
-    (loop for v in seq
+
+    (loop for r = seq then (cdr r)
+          for v = (car r)
+          while r
           do
-          (inject-sep strm array-indent)
-          (inject-value strm v pretty-indent array-indent)))
-  (inject-sep strm indented-at)
+          (inject-sep strm array-indent :json-mode json-mode)
+          (inject-value strm v pretty-indent array-indent
+                        :json-mode json-mode)
+          (when (and (cdr r)
+                     json-mode)
+            (write-char #\, strm))))
+  (inject-sep strm indented-at :json-mode json-mode)
   (write-char #\] strm))
 
-(defun inject-object (strm object pretty-indent indented-at &optional &rest
+(defun inject-object (strm object pretty-indent indented-at &key json-mode
                            line-width-args)
   (let* ((printable
            (stable-sort
@@ -936,10 +961,13 @@
          (object-indent (when (not (null pretty-indent))
                           (+ indented-at pretty-indent))))
     (write-char #\{ strm)
-    (loop for (k . v) in printable
+    (loop for r = printable then (cdr r)
+          for k = (caar r) and v = (cdar r)
+          while r
           do
-          (inject-sep strm object-indent)
-          (inject-value strm k pretty-indent object-indent)
+          (inject-sep strm object-indent :json-mode json-mode)
+          (inject-value strm k pretty-indent object-indent
+                        :json-mode json-mode)
           (if
               (and
                 (typep v 'string)
@@ -952,32 +980,43 @@
                         #'suggest-line-width
                         (cons
                           (+ object-indent pretty-indent)
-                          line-width-args))))))
-(let ((blob-indent (+ object-indent pretty-indent)))
-              (inject-sep strm blob-indent)
-              (inject-blob strm v blob-indent))
-            (progn
-              (write-char #\Space strm)
-              (inject-value strm v pretty-indent object-indent))))
-    (inject-sep strm indented-at)
+                          line-width-args))
+                      json-mode))))
+              (let ((blob-indent (+ object-indent pretty-indent)))
+                (inject-sep strm blob-indent :json-mode json-mode)
+                (inject-blob strm v blob-indent :json-mode json-mode))
+              (progn
+                (if json-mode
+                  (progn
+                    (write-char #\: strm)
+                    (when pretty-indent
+                      (write-char #\Space strm)))
+                  (write-char #\Space strm))
+                (inject-value strm v pretty-indent object-indent :json-mode json-mode)
+                (when (and
+                        json-mode
+                        (cdr r))
+                  (write-char #\, strm)))))
+    (inject-sep strm indented-at :json-mode json-mode)
     (write-char #\} strm)))
 
-(defun inject-value (strm val pretty-indent indented-at)
+(defun inject-value (strm val pretty-indent indented-at &key json-mode)
   (declare (type (or boolean stream) strm)
            (type (or null (integer 0 64)) pretty-indent)
            (type (or null (integer 0 1024)) indented-at))
   (typecase val
-    ((or null boolean symbol) (inject-symbol strm val))
+    ((or null boolean symbol) (inject-symbol strm val :json-mode json-mode))
     (number (inject-number strm val))
-    (string (inject-blob strm val indented-at))
-    (hash-table (inject-object strm val pretty-indent indented-at))
-    (sequence (inject-array strm val pretty-indent indented-at)))
+    (string (inject-blob strm val indented-at :json-mode json-mode))
+    (hash-table (inject-object strm val pretty-indent indented-at :json-mode json-mode))
+    (sequence (inject-array strm val pretty-indent indented-at :json-mode json-mode)))
   val)
 
-(defun generate-to (strm val pretty-indent)
+(defun generate-to (strm val &key (pretty-indent 0) json-mode)
   (declare (type (or boolean stream) strm)
-           (type (or null (integer 0 64)) pretty-indent))
-  (inject-value strm val pretty-indent 0))
+           (type (or null (integer 0 64)) pretty-indent)
+           (type boolean json-mode))
+  (inject-value strm val pretty-indent 0 :json-mode json-mode))
 
 (defun nested-to-alist
   (value)
@@ -986,7 +1025,8 @@
   alist.
   "
   (cond
-    ((listp value)
+    ((stringp value) value)
+    ((or (vectorp value) (listp value))
      (map 'list #'nested-to-alist value))
     ((hash-table-p value)
      (let ((coll

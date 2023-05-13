@@ -44,6 +44,7 @@
                    (B
                      (:DESTINATION . "yon")
                      (:ORIGIN . "thither")) (C 1 2 3 4 5))))))
+
 (deftest
   parse-tests
   (testing "empty"
@@ -140,6 +141,40 @@ that"
  )))
 
 (deftest
+  json-generate-test
+  (testing "simple example of json"
+    (ok (equal
+    (with-output-to-string (strm)
+      (nrdl:generate-to strm
+                        (alexandria:alist-hash-table
+                          `((:a . 1)
+                            (:b . (:x :y :z))
+                            (:c . ("food" "for" "thought"))
+                            (:d . ,nil)
+                            (:e . nrdl:false)
+                            (:f . t)
+                            (:g . 0.87)))
+                        :pretty-indent 4
+                        :json-mode t))
+"{
+    \"a\": 1,
+    \"b\": 2,
+    \"c\": [
+        \"food\",
+        \"for\",
+        \"thought\"
+    ],
+    \"d\": null,
+    \"e\": false,
+    \"f\": true,
+    \"g\": 0.87
+}"))))
+
+
+        sparrow 4))
+
+
+(deftest
   generate-test
   (testing "thorough example"
   (let ((sparrow (with-input-from-string
@@ -203,7 +238,7 @@ that"
                      (nrdl:parse-from strm))))
     (ok (equal
     (with-output-to-string (strm)
-      (nrdl:generate-to strm sparrow 4))
+      (nrdl:generate-to strm sparrow :pretty-indent 4))
 "{
     'force push' \"I sing because I'm happy\"
     \"I am web mistress ming\" false
