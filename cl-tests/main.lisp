@@ -86,7 +86,7 @@
                        |Over me
                        ^
 
-                       'force push'
+                       `force push`
                        >I sing
                        >because
                        >I'm happy
@@ -158,7 +158,11 @@ that"
                         :json-mode t))
 "{
     \"a\": 1,
-    \"b\": 2,
+    \"b\": [
+        \"x\",
+        \"y\",
+        \"z\",
+    ],
     \"c\": [
         \"food\",
         \"for\",
@@ -201,7 +205,7 @@ that"
                        |Over me
                        ^
 
-                       'force push'
+                       `force push`
                        >I sing
                        >because
                        >I'm happy
@@ -237,7 +241,7 @@ that"
     (with-output-to-string (strm)
       (nrdl:generate-to strm sparrow :pretty-indent 4))
 "{
-    'force push' \"I sing because I'm happy\"
+    `force push` \"I sing because I'm happy\"
     \"I am web mistress ming\" false
     other
         |And I know

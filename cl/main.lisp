@@ -451,7 +451,7 @@
   (declare (type (or boolean stream) strm)
            (type character chr))
   (convert-to-symbol
-    (extract-quoted strm chr #\')))
+    (extract-quoted strm chr #\`)))
 
 (defun extract-value (strm chr)
   (declare (type (or boolean stream) strm)
@@ -463,7 +463,7 @@
          (extract-array strm chr))
         ((char= chr #\")
          (extract-quoted-blob strm chr))
-        ((char= chr #\')
+        ((char= chr #\`)
          (extract-quoted-symbol strm chr))
         ((or
            (char= chr +start-verbatim+)
@@ -654,7 +654,8 @@
   t
   '(#\ude6d #\\ #\" #\c #\n #\Newline #\Tab #\Return #\c #\a #\b))
 (inject-quoted t #\" "asdf
-	\\\"blarg")
+
+	\\\"blarg")
 =>
 
 * (inject-quoted
@@ -893,9 +894,9 @@
     (if (> (count-if (lambda (x)
                        (or
                          (char= x #\Space)
-                         (escapable-p x #\')))
+                         (escapable-p x #\`)))
                      prop-content) 0)
-      (inject-quoted strm prop-content #\')
+      (inject-quoted strm prop-content #\`)
       (write-string prop-content strm))))
 #|
 (inject-symbol t :argyle)
@@ -1032,3 +1033,4 @@
                                           (format nil "~A" (car thing))))))
     (t
       value)))
+

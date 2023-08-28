@@ -1,6 +1,6 @@
 # NeRDL: NEstable, Readable Document Language
 
-This repository houses the nestable readable document language.
+This repository houses the Nestable Readable Document Language.
 
 ## Example Document
 
@@ -101,27 +101,27 @@ pleasing to the eye.
 
   - Easy to learn for users, with familiar syntax that matches what is used
     elsewhere.
-  - Easy enough to read that it is usable as a configuration language
+  - Easy enough to read that it is usable as a configuration language.
   - Very easy to parse for implementers, requiring only single-character
     lookahead.
   - Documents can be nested in other documents without changing their content or
     adding a bunch of backslashes everywhere, just like YAML.
   - Comments work the same as YAML.
   - Unlike YAML, it is syntactically specified. This allows editors to help with
-    formatting and navigation. This is especially helpful when documeents become
+    formatting and navigation. This is especially helpful when documents become
     large.
   - Symbols as a data type is introduced, allowing for easier parsing in typed
     languages and keyword/symbol representation in Lisps and others.
 
 ### Caveats
 
-  - Many of the same disadvantages carry over from JSON.
-  - If a NRDL document is slurped in, it cannot be printed out again and still
-    have it be the same as it was before. This is because order of the keys in
-    various often lost in the parsing process, as are comments.
-  - Care must be taken when desigining APIs because order is not guaranteed in
-    objects.
-  - Infinity and NaN are not defined.
+  - Many of the same disadvantages carry over from JSON:
+    - If a NRDL document is slurped in, it cannot be printed out again and still
+      have it be the same as it was before. This is because order of the keys is
+      lost in the parsing process, as are comments.
+    - Care must be taken when desigining APIs because order is not guaranteed in
+      objects.
+    - Infinity and NaN are not defined.
   - Single quotes and double quotes are both used in the language, but do not
     mean the same thing and are not interchangeable.
   - Prose doesn't compress multiple whitespace characters at the end of the line
