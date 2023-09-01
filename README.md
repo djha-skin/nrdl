@@ -1,7 +1,6 @@
 # NeRDL: NEstable, Readable Document Language
 
 This repository houses the Nestable Readable Document Language.
-
 ## Example Document
 
 
@@ -32,7 +31,7 @@ This repository houses the Nestable Readable Document Language.
       |Over me
       ^
 
-   'force push' >I sing
+   `force push` >I sing
                 >because
                 >I'm happy
                 ^
@@ -70,9 +69,6 @@ This repository houses the Nestable Readable Document Language.
         ^
       ]
 }
-
-
-
 
 ```
 
@@ -283,16 +279,17 @@ Haskin"` finds its way into the `Name` member of a struct. Even the string
 string in the actual program.
 
 NRDL has its own data type for this use case. It is a symbol. This is a string
-which can be encoded in one of two ways. The first is using single quotes, `'`,
+which can be encoded in one of two ways. The first is using backticks,
+<code>\`</code>
 like this:
 
 ```
-'name'
-'address'
+`name`
+`address`
 ```
 
 Being a string that names something, it is an error to have a symbol which is
-empty. The expression `''` is not allowed.
+empty. The expression <code>``</code> is not allowed.
 
 The other is as barewords. The rules around bare words is that they must start
 with characters that ensure they don't get confused with numbers. You can't
@@ -331,9 +328,9 @@ the following guidelines:
         simply be decoded into normal strings without consequence. This category
         includes Python, Perl, PHP, etc.
 
-Note a caveat of this design decision. the literals `'true'` and `true` are
+Note a caveat of this design decision. the literals <code>`true`</code> and `true` are
 equivalent, and should be treated the same as each other. The same goes for
-`'false'` and `false`, and `'null'` and `null`.
+<code>`false`</code> and `false`, and <code>`null`</code> and `null`.
 
 Symbols can be used as keys or values, but they are especially useful as object
 keys.
@@ -344,9 +341,9 @@ Check out the [vim NRDL plugin](https://git.djha.skin/me/vim-nrdl.git).
 
 ## Contact Me
 
-I am `skin` on the `#lisp` IRC channel on libera.chat and elsewhere. I will
-maintain an IRC channel on that server, `#nrdl`, where people can come and ask
-questions.
+I am `skin` on the `#commonlisp` IRC channel on libera.chat and elsewhere. If
+this becomes popular, I will maintain an IRC channel on that server, `#nrdl`,
+where people can come and ask questions.
 
 ## ABNF
 
@@ -415,7 +412,7 @@ quoted-string = double-quote
 
 char = unescaped
      / escape
-     / ( %x22               ; ":U+0022
+     / ( %x27               ; ":U+0022
        / %x5C               ; \:U+005C
        / %x2F               ; /:U+002F
        / %x62               ; b:U+0008
@@ -455,8 +452,8 @@ quoted-symbol = single-quote
                 1*symchar
                 single-quote
 
-symchar = single-unescaped
-     / escape ( %x21              ; '
+symchar = backtick-unescaped
+     / escape ( %x60              ; `
               / %x5C              ; \:U+005C
               / %x2F              ; /:U+002F
               / %x62              ; b:U+0008
@@ -467,13 +464,12 @@ symchar = single-unescaped
               / %x75 4hex-digits) ; uXXXX: U+XXXX
 
 escape = %x5C             ; \
-single-unescaped = %x20   ; all
-          / %x22          ;
-          / %x23-5B       ; except
-          / %x5D-10FFFF   ; ' and \
 
+backtick-unescaped = %x20-5B   ; all
+          / %x5D-5F       ; except `
+          / %x61-10FFFF   ; and \
 
-bareword = bareword-start 
+bareword = bareword-start
         *( bareword-middle )
 
 bareword-start = %x21     ; !
@@ -530,6 +526,7 @@ plus = %x2B                ; +
 minus = %x2D               ; -
 double-quote = %x27        ; "
 single-quote = %x22        ; '
+backtick = %x60             ; `
 fslash = %x2F              ; /
 pipe = %x7C                ; |
 digit = %x30-39            ; 0-9
