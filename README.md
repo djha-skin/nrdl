@@ -118,8 +118,6 @@ pleasing to the eye.
     - Care must be taken when desigining APIs because order is not guaranteed in
       objects.
     - Infinity and NaN are not defined.
-  - Single quotes and double quotes are both used in the language, but do not
-    mean the same thing and are not interchangeable.
   - Prose doesn't compress multiple whitespace characters at the end of the line
     into one character, as YAML does. This is to ease parsing and keep the
     language simple.
@@ -263,6 +261,7 @@ They are "program strings", strings intended as bookkeeping help to the loading
 program, but not really intended to store user data.
 
 Consider the following JSON structure:
+
 ```json
     {
         "name": "Daniel Haskin",
@@ -272,11 +271,11 @@ Consider the following JSON structure:
 ```
 
 The strings `"name"` and `"address"` don't actually have anything to do with the
-data they are hauling. They are really just structure markers. In C and Golang,
-they are usually elided entirely, and are simply used to ensure that `"Daniel
-Haskin"` finds its way into the `Name` member of a struct. Even the string
-`"BROWN"` is only one of a few possible values, and need not be encoded using a
-string in the actual program.
+data they are hauling. They are really just structure markers. In languages like
+C and Golang, they are usually elided entirely, and are simply used to ensure
+that `"Daniel Haskin"` finds its way into the `Name` member of a struct. Even
+the string `"BROWN"` is only one of a few possible values, and might be encoded
+as the name of an enum member in a compiled language.
 
 NRDL has its own data type for this use case. It is a symbol. This is a string
 which can be encoded in one of two ways. The first is using backticks,
@@ -318,9 +317,9 @@ the following guidelines:
         program names, such as struct member names, enumeration values, or names
         of constants. This category includes such languages as C, C++, Java,
         Golang, Rust, and Zig.
-      - Languages with a concept of a keyword datatype should decode NRDL
-        symbols as keywords. This includes such languages as Common Lisp,
-        Clojure, Janet, Elixir, and Ruby.
+      - Languages with a concept of a keyword (a.k.a. atom) datatype should
+        decode NRDL symbols as keywords. This includes such languages as Common
+        Lisp, Clojure, Janet, Elixir, and Ruby.
       - Languages with the concept of a symbol as a datatype but not keywords
         should decode NRDL symbols as symbols. This includes members of the
         Scheme family of Lisps.
@@ -330,7 +329,7 @@ the following guidelines:
 
 Note a caveat of this design decision. the literals <code>`true`</code> and `true` are
 equivalent, and should be treated the same as each other. The same goes for
-<code>`false`</code> and `false`, and <code>`null`</code> and `null`.
+<code>\`false\`</code> and `false`, and <code>\`null\`</code> and `null`.
 
 Symbols can be used as keys or values, but they are especially useful as object
 keys.
