@@ -508,8 +508,7 @@ hex-digit = digit          ; 0-9
           / %x61-66        ; a-f
 
 line-content = %x09        ; all
-             / %x20-5B     ; but
-             / %x5D-10FFF  ; \r and \n
+             / %x20-10FFF  ; but \r and \n
 
 line-delimiter = %x0D %x0A ; \r\n
                / %x0A      ; \n
