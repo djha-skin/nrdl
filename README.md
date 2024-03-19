@@ -485,11 +485,15 @@ bareword-start = %x21     ; !
 
 bareword-middle = bareword-start
                 / digit
-                / comma
-                / colon
                 / plus
                 / minus
                 / dot
+
+bareword-end = bareword-start
+             / digit
+             / plus
+             / minus
+             / dot
 
 comment = comment-start
           line-content
@@ -524,7 +528,7 @@ plus = %x2B                ; +
 minus = %x2D               ; -
 double-quote = %x27        ; "
 single-quote = %x22        ; '
-backtick = %x60             ; `
+backtick = %x60            ; `
 fslash = %x2F              ; /
 pipe = %x7C                ; |
 digit = %x30-39            ; 0-9
