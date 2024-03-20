@@ -1,3 +1,8 @@
+;;;; main.lisp -- Reference Implementation Parser for NRDL in Common Lisp
+;;;;
+;;;; SPDX-FileCopyrightText: 2024 Daniel Jay Haskin
+;;;; SPDX-License-Identifier: MIT
+
 #+(or)
 (progn
   (declaim (optimize (speed 0) (space 0) (debug 3))
@@ -5,7 +10,7 @@
 
 (in-package #:cl-user)
 (defpackage
-  #:nrdl (:use #:cl)
+  #:com.djhaskin.nrdl (:use #:cl)
   (:documentation
     "
     Nestable Readable Document Language
@@ -15,16 +20,15 @@
       parse-from
       generate-to
       nested-to-alist
-      string-keyword
+      string-symbol
       symbol-string
+      *symbol-package*
       *symbol-deserialize-case*
       *symbol-serialize-case*))
-(in-package #:nrdl)
 
-; EOT, End Of Transmission, according to ASCII
-; It's what SBCL uses for EOF
-; Guess I'll try it out
-(defconstant +eof+ (code-char 4))
+(in-package #:com.djhaskin.nrdl)
+
+(defconstant +eof+ :eof)
 
 (defun peek-chr (strm)
   (declare (type (or boolean stream) strm))
@@ -36,10 +40,7 @@
 
 (defun must-read-chr (strm)
   (declare (type (or boolean stream) strm))
-  (let ((chr (read-chr strm)))
-    (if (char= chr +eof+)
-      (error "EOF reached during reading")
-      chr)))
+  (read-char strm))
 
 (defun number-start-p (chr)
   (declare (type character chr))
@@ -174,7 +175,7 @@
   (declare (type (or boolean stream) strm))
   (loop with last-read = (read-chr strm)
         while (and
-                (not (char= last-read +eof+))
+                (not (eq last-read +eof+))
                 (not (char= last-read #\Newline)))
         do
         (setf last-read (read-chr strm))
@@ -251,18 +252,18 @@
         while (and
                 (char= next chr)
                 (not (char= next #\^))
-                (not (char= next +eof+)))
+                (not (eq next +eof+)))
         do
         (setf last-read (read-chr strm))
         (setf next (peek-chr strm))
         (loop named getline
               while (and (not (char= next #\Newline))
-                         (not (char= next +eof+)))
+                         (not (eq next +eof+)))
               do
               (setf last-read (read-chr strm))
               (push last-read building)
               (setf next (peek-chr strm)))
-        (when (char= next +eof+)
+        (when (eq next +eof+)
           (return-from toplevel
                        (build-string building)))
         (setf last-read (read-chr strm))
@@ -276,7 +277,7 @@
         (setf next (peek-chr strm))
         finally (progn
                   (unless (or
-                            (char= next +eof+)
+                            (eq next +eof+)
                             (char= next #\^))
                     (error "Must end multiline blob with a caret"))
                   (when (char= next #\^)
@@ -320,30 +321,30 @@
             (string-downcase str)
             (string-upcase str)))))))
 
-;; Variable used to determine the case of a string
-;; used for the name of a new symbol upon deserialization.
-;;
-;; Set to `(readtable-case *readtable*)` by default.
+;;; Variable used to determine the case of a string
+;;; used for the name of a new symbol upon deserialization.
+;;;
+;;; Set to `(readtable-case *readtable*)` by default.
 (defparameter *symbol-deserialize-case*
   (readtable-case *readtable*))
 
-;; Variable used to determine the case of a string
-;; generated from the name of a symbol upon serialization.
-;; Can have the same values as the output of `readtable-case`:
-;; `:upcase`, `:downcase`, `:preserve`, and `:invert`,
-;; with the same effects.
-;;
-;; Unlike its cousin, I can't just give this thing a
-;; default based on the readtable,
-;;
-;; and the printer has no notion of this. It just prints whatever case
-;; was given originally. In effect, the printer is set to `:preserve` by
-;; default.
-;;
-;; This is a default which is not useful in my case, I think.
-;;
-;; Therefore, by default, it will be set to `:downcase`, which addresses
-;; a much more common need.
+;;; Variable used to determine the case of a string
+;;; generated from the name of a symbol upon serialization.
+;;; Can have the same values as the output of `readtable-case`:
+;;; `:upcase`, `:downcase`, `:preserve`, and `:invert`,
+;;; with the same effects.
+;;;
+;;; Unlike its cousin, I can't just give this thing a
+;;; default based on the readtable,
+;;;
+;;; and the printer has no notion of this. It just prints whatever case
+;;; was given originally. In effect, the printer is set to `:preserve` by
+;;; default.
+;;;
+;;; This is a default which is not useful in my case, I think.
+;;;
+;;; Therefore, by default, it will be set to `:downcase`, which addresses
+;;; a much more common need.
 (defparameter *symbol-serialize-case*
   :downcase)
 
@@ -361,8 +362,10 @@
         ((eql case-guide :invert) (string-invertcase str))
         (t (string-upcase str))))
 
+(defparameter *symbol-package* (find-package :KEYWORD))
+
 (defun
-  string-keyword (str &optional (case-guide *symbol-deserialize-case*))
+  string-symbol (str &optional (case-guide *symbol-deserialize-case*))
   "
   Creates a keyword from a string.
 
@@ -381,14 +384,15 @@
            (type keyword case-guide))
   (intern
     (symbol-string-prep str case-guide)
-    :KEYWORD))
+    *symbol-package*))
 
 (defun symbol-string
   (sym &optional (case-guide *symbol-serialize-case*))
   (declare (type symbol sym)
            (type keyword case-guide))
   (cond ((eql sym 't) "true")
-        ((eql sym 'nil) "null")
+        ((eql sym 'nil) "false")
+        ((eql sym 'cl:null) "null")
         (t (symbol-string-prep (symbol-name sym) case-guide))))
 
 (defun bareword-start-p (chr)
@@ -430,7 +434,7 @@
          nil)
         ((string= final-string "null")
          'cl:null)
-        (t (string-keyword final-string))))
+        (t (string-symbol final-string))))
 
 (defun extract-bare-symbol (strm chr)
   (declare (type (or boolean stream) strm)
@@ -486,7 +490,7 @@
         with last-read = (extract-list-sep strm (peek-chr strm))
         with next = (peek-chr strm)
         while (and
-                (not (char= next +eof+))
+                (not (eq next +eof+))
                 (not (char= next #\])))
         do
         (unless found-sep
@@ -501,7 +505,7 @@
         finally
         (progn (when (and
                 (char= next #\])
-                (not (char= next +eof+)))
+                (not (eq next +eof+)))
                   (read-chr strm))
                   (return (reverse building)))))
 
@@ -515,7 +519,7 @@
         with last-read = (extract-list-sep strm (peek-chr strm))
         with next = (peek-chr strm)
         while (and
-                (not (char= next +eof+))
+                (not (eq next +eof+))
                 (not (char= next #\})))
         do
         (unless found-sep
