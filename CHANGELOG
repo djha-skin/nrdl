@@ -1,0 +1,18 @@
+# Releases
+
+* Format: "LANGUAGE VERSION"
+
+## CL 0.4.0
+
+### Added
+
+* Added an export, `*symbol-package*`, a parameter that controls into which
+  package the symbols will be interned when NRDL is parsed.
+* Added a test around this
+
+### Changed
+
+* Renamed package to `com.djhaskin.nrdl`
+* Renamed system to `com.djhaskin.nrdl`
+* Migrated from `rove` to `parachute` for tests
+* Reduced the dependencies in the ASD list.

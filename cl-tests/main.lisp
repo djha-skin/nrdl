@@ -36,10 +36,8 @@
 
 (in-package #:com.djhaskin.nrdl/tests)
 
-#+(or)
-(test *)
-
 (define-test nested-to-alist)
+
 (define-test "nested-to-alist: empty cases"
   :parent nested-to-alist
   (is eq nil (nrdl:nested-to-alist nil))
@@ -79,10 +77,8 @@
           (:DESTINATION . "yon")
           (:ORIGIN . "thither")) (C 1 2 3 4 5))))
 
-#+(or)
-(test *)
-
 (define-test parse-tests)
+
 (define-test "parse: empty"
   :parent parse-tests
   (handler-case
@@ -157,6 +153,48 @@
   ]
   }")
 
+(defparameter *sparrow-alist*
+  `((:|FORCE PUSH|
+                                                   . "I sing because I'm happy")
+    ("I am web mistress ming")
+    (:OTHER . ,(format nil "~@{~A~^~%~}"
+                                                            "And I know"
+                                                            "He's watching"
+                                                            "Over me"))
+    (:POEM . ,(format nil "~@{~A~^~%~}"
+                                                           "His eyee"
+                                                           "is on"
+                                                           "The sparrow"))
+    (:THE-SPARROWS
+      . :HIS-EYE)
+    (:THE-TREES)
+    (:THE-WIND . "bullseye")
+    (:THIS-SHOULD-STILL-WORK . 15.0)
+    (:WENDOVER
+      ((:ALSO . -1000)
+       (:AND . 1.01)
+       (:APPARENTLY . 10000)
+       (:BUT . 1000)
+       (:GAMBLING . 100)
+       (:MUCH . -10)
+       (:PARAMEDICS . -10000)
+       (:SO . 1))
+      ((:A
+         . :FIRE)
+       (:DIE
+         . :IN))
+      15 ,(format nil "~@{~A~^~%~}" "this" "that")
+      ,(format
+         nil "~@{~A~^ ~}"
+         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do"
+         "eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim"
+         "ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut"
+         "aliquip ex ea commodo consequat. Duis aute irure dolor in"
+         "reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla"
+         "pariatur. Excepteur sint occaecat cupidatat non proident, sunt in"
+         "culpa qui officia deserunt mollit anim id est laborum."))
+    ("i am mordac" . T) ("you are so wrong" . CL:NULL)))
+
 (define-test "parse: more general case"
   :parent parse-tests
            (is equal
@@ -164,28 +202,7 @@
                    (with-input-from-string
                      (strm *sparrow*)
                      (nrdl:parse-from strm)))
-'((:|FORCE PUSH| . "I sing because I'm happy")
- ("I am web mistress ming" . nil)
- (:OTHER . "And I know
-He's watching
-Over me")
- (:POEM . "His eyee
-is on
-The sparrow")
- (:THE-SPARROWS . :HIS-EYE) (:THE-TREES . nil) (:THE-WIND . "bullseye")
- (:THIS-SHOULD-STILL-WORK . 15.0)
- (:WENDOVER
-  ((:ALSO . -1000) (:AND . 1.01) (:APPARENTLY . 10000) (:BUT . 1000)
-   (:GAMBLING . 100) (:MUCH . -10) (:PARAMEDICS . -10000) (:SO . 1))
-  ((:A . :FIRE) (:DIE . :IN)) 15 "this
-that"
-"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-  )
- ("i am mordac" . T) ("you are so wrong" . cl:null))
-))
-
-#+(or)
-(test *)
+    *sparrow-alist*))
 
 (define-test json-generate-test)
 
@@ -221,9 +238,6 @@ that"
     \"f\": true,
     \"g\": 0.87
 }"))
-
-#+(or)
-(test *)
 
 (defparameter *sparrow-object* (with-input-from-string
                                   (strm *sparrow*)
@@ -291,6 +305,56 @@ that"
 (defparameter *test-intern-package*
   (defpackage #:com.djhaskin.nrdl/test-intern-package))
 
-(define-test "generate: but with a different package")
+(defparameter *sparrow-alist-different-package*
+  `((COM.DJHASKIN.NRDL/TEST-INTERN-PACKAGE::|FORCE PUSH|
+                                                   . "I sing because I'm happy")
+    ("I am web mistress ming")
+    (COM.DJHASKIN.NRDL/TEST-INTERN-PACKAGE::OTHER . ,(format nil "~@{~A~^~%~}"
+                                                            "And I know"
+                                                            "He's watching"
+                                                            "Over me"))
+    (COM.DJHASKIN.NRDL/TEST-INTERN-PACKAGE::POEM . ,(format nil "~@{~A~^~%~}"
+                                                           "His eyee"
+                                                           "is on"
+                                                           "The sparrow"))
+    (COM.DJHASKIN.NRDL/TEST-INTERN-PACKAGE::THE-SPARROWS
+      . COM.DJHASKIN.NRDL/TEST-INTERN-PACKAGE::HIS-EYE)
+    (COM.DJHASKIN.NRDL/TEST-INTERN-PACKAGE::THE-TREES)
+    (COM.DJHASKIN.NRDL/TEST-INTERN-PACKAGE::THE-WIND . "bullseye")
+    (COM.DJHASKIN.NRDL/TEST-INTERN-PACKAGE::THIS-SHOULD-STILL-WORK . 15.0)
+    (COM.DJHASKIN.NRDL/TEST-INTERN-PACKAGE::WENDOVER
+      ((COM.DJHASKIN.NRDL/TEST-INTERN-PACKAGE::ALSO . -1000)
+       (COM.DJHASKIN.NRDL/TEST-INTERN-PACKAGE::AND . 1.01)
+       (COM.DJHASKIN.NRDL/TEST-INTERN-PACKAGE::APPARENTLY . 10000)
+       (COM.DJHASKIN.NRDL/TEST-INTERN-PACKAGE::BUT . 1000)
+       (COM.DJHASKIN.NRDL/TEST-INTERN-PACKAGE::GAMBLING . 100)
+       (COM.DJHASKIN.NRDL/TEST-INTERN-PACKAGE::MUCH . -10)
+       (COM.DJHASKIN.NRDL/TEST-INTERN-PACKAGE::PARAMEDICS . -10000)
+       (COM.DJHASKIN.NRDL/TEST-INTERN-PACKAGE::SO . 1))
+      ((COM.DJHASKIN.NRDL/TEST-INTERN-PACKAGE::A
+         . COM.DJHASKIN.NRDL/TEST-INTERN-PACKAGE::FIRE)
+       (COM.DJHASKIN.NRDL/TEST-INTERN-PACKAGE::DIE
+         . COM.DJHASKIN.NRDL/TEST-INTERN-PACKAGE::IN))
+      15 ,(format nil "~@{~A~^~%~}" "this" "that")
+      ,(format
+         nil "~@{~A~^ ~}"
+         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do"
+         "eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim"
+         "ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut"
+         "aliquip ex ea commodo consequat. Duis aute irure dolor in"
+         "reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla"
+         "pariatur. Excepteur sint occaecat cupidatat non proident, sunt in"
+         "culpa qui officia deserunt mollit anim id est laborum."))
+    ("i am mordac" . T) ("you are so wrong" . CL:NULL)))
 
+(define-test alternate-package)
 
+(define-test "Alternate package: parse"
+  :parent alternate-package
+  (is equal
+      (nrdl:nested-to-alist
+        (with-input-from-string
+            (strm *sparrow*)
+          (let ((nrdl:*symbol-package* *test-intern-package*))
+            (nrdl:parse-from strm))))
+      *sparrow-alist-different-package*))
