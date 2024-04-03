@@ -80,7 +80,9 @@
            (type character chr))
   (let ((building nil)
         (last-read chr))
-    (loop while (number-char-p last-read)
+    (loop while (and
+                  (not (eq last-read +eof+))
+                  (number-char-p last-read))
           do
           (push last-read building)
           (read-chr strm)
@@ -96,7 +98,8 @@
   (must-read-chr strm)
   (let ((last-read (must-read-chr strm))
         (building nil))
-    (loop while (char/= last-read quote-char)
+    (loop while (and (not (eq last-read +eof+))
+                     (char/= last-read quote-char))
           do
           (if (char= last-read #\\)
             (progn
@@ -190,6 +193,7 @@
         with next = chr
     do
     (cond
+      ((eq next +eof+)
       ((char= next +start-comment+)
        (setf just-read (extract-comment strm)))
       ((funcall pred next)

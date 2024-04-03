@@ -86,7 +86,8 @@
         (with-input-from-string (strm "")
           (nrdl:parse-from strm))
         (fail "Should have thrown an error"))
-    (t (sig) (true sig))))
+    (nrdl:parse-error (e) (true sig))
+    (t (sig) (fail "Should have thrown a parse-error"))))
 
 (define-test "parse: simple"
   :parent parse-tests
