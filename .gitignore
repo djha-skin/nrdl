@@ -22,4 +22,5 @@
 # Lisp stuff
 /.repl/ros_history
 /.qlot/
+/systems/
 /.bundle-libs/

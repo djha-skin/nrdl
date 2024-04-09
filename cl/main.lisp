@@ -194,6 +194,7 @@
     do
     (cond
       ((eq next +eof+)
+       (return just-read))
       ((char= next +start-comment+)
        (setf just-read (extract-comment strm)))
       ((funcall pred next)
@@ -206,15 +207,6 @@
   (declare (type (or boolean stream) strm)
            (type character chr))
   (extract-sep strm chr #'guarded-sepchar-p))
-
-(defun must-extract-list-sep (strm chr)
-  (declare (type (or boolean stream) strm)
-           (type character chr))
-  (let ((last-read (extract-sep strm chr #'guarded-sepchar-p)))
-    (when (null last-read)
-      (error "separator expected"))
-    last-read))
-
 
 (defun extract-blob-sep (strm chr)
   (declare (type (or boolean stream) strm)
@@ -254,9 +246,9 @@
         with next = chr
         with building = nil
         while (and
+                (not (eq next +eof+))
                 (char= next chr)
-                (not (char= next #\^))
-                (not (eq next +eof+)))
+                (not (char= next #\^)))
         do
         (setf last-read (read-chr strm))
         (setf next (peek-chr strm))
@@ -279,13 +271,11 @@
           (when sep-result
             (setf last-read sep-result)))
         (setf next (peek-chr strm))
+
         finally (progn
-                  (unless (or
-                            (eq next +eof+)
-                            (char= next #\^))
+                  (unless (char= next #\^)
                     (error "Must end multiline blob with a caret"))
-                  (when (char= next #\^)
-                    (read-chr strm))
+                  (read-chr strm)
                   (return-from toplevel (build-string (cdr building))))))
 
 (defun extract-quoted-blob (strm chr)
@@ -446,7 +436,9 @@
   (loop with building = nil
         with last-read = nil
         with next = chr
-        while (bareword-middle-p next)
+        while (and
+                (not (eq next +eof+))
+                (bareword-middle-p next))
         do
         (setf last-read (read-chr strm))
         (push last-read building)
@@ -508,8 +500,8 @@
         (setf next (peek-chr strm))
         finally
         (progn (when (and
-                (char= next #\])
-                (not (eq next +eof+)))
+                       (not (eq next +eof+))
+                       (char= next #\]))
                   (read-chr strm))
                   (return (reverse building)))))
 
@@ -545,7 +537,9 @@
         (setf last-read (extract-list-sep strm (peek-chr strm)))
         (setf found-sep (guarded-sepchar-p last-read))
         (setf next (peek-chr strm))
-        finally (when (char= next #\})
+        finally (when (and
+                        (not (eq next +eof+))
+                        (char= next #\}))
                   (read-chr strm))
                   (return
                   (alexandria:plist-hash-table
