@@ -52,21 +52,19 @@
   (read-char strm))
 
 (defun number-start-p (chr)
-  (declare (type streamed chr))
+  (declare (type character chr))
   (or
-    (eql chr #\-)
-    (eql chr #\.)
-    (and (typep chr 'character)
-         (digit-char-p chr))))
+    (char= chr #\-)
+    (char= chr #\.)
+    (digit-char-p chr)))
 
 (defun number-char-p (chr)
-  (declare (type streamed chr))
+  (declare (type character chr))
   (or
     (number-start-p chr)
-    (eql chr #\+)
-    (eql chr #\E)
-    (eql chr #\e)))
-
+    (char= chr #\+)
+    (char= chr #\E)
+    (char= chr #\e)))
 
 #+(or)
 (equal
@@ -111,27 +109,27 @@
     (loop while (and (not (eq last-read +eof+))
                      (char/= last-read quote-char))
           do
-          (if (eql last-read #\\)
+          (if (char= last-read #\\)
             (progn
               (setf last-read (must-read-chr strm))
               (cond
                     ((eql last-read quote-char)
                      (push quote-char building))
-                    ((eql last-read #\\)
+                    ((char= last-read #\\)
                      (push last-read building))
-                    ((eql last-read #\/)
+                    ((char= last-read #\/)
                      (push last-read building))
-                    ((eql last-read #\b)
+                    ((char= last-read #\b)
                      (push #\Backspace building))
-                     ((eql last-read #\f)
+                     ((char= last-read #\f)
                       (push #\Page building))
-                     ((eql last-read #\n)
+                     ((char= last-read #\n)
                       (push #\Newline building))
-                     ((eql last-read #\r)
+                     ((char= last-read #\r)
                       (push #\Return building))
-                     ((eql last-read #\t)
+                     ((char= last-read #\t)
                       (push #\Tab building))
-                     ((eql last-read #\u)
+                     ((char= last-read #\u)
                       (push
                         (code-char
                           (let ((build-ordinal (make-string 6)))
@@ -154,25 +152,25 @@
 (defconstant +start-comment+ #\#)
 
 (defun blankspace-p (chr)
-  (declare (type streamed chr))
+  (declare (type character chr))
   (or
-    (eql chr #\Tab)
-    (eql chr #\Space)
+    (char= chr #\Tab)
+    (char= chr #\Space)
     ))
 
 (defun whitespace-p (chr)
-  (declare (type streamed chr))
+  (declare (type character chr))
     (or
-      (eql chr #\Newline)
-      (eql chr #\Return)
-      (eql chr #\Page)
+      (char= chr #\Newline)
+      (char= chr #\Return)
+      (char= chr #\Page)
       (blankspace-p chr)))
 
 (defun sepchar-p (chr)
-  (declare (type streamed chr))
+  (declare (type character chr))
   (or (whitespace-p chr)
-      (eql chr #\,)
-      (eql chr #\:)))
+      (char= chr #\,)
+      (char= chr #\:)))
 
 (defun guarded-sepchar-p (chr)
   (declare (type (or null character) chr))
@@ -180,7 +178,7 @@
       (sepchar-p chr)))
 
 (defun guarded-blankspace-p (chr)
-  (declare (type streamed chr))
+  (declare (type (or null character) chr))
     (unless (null chr)
       (blankspace-p chr)))
 
@@ -189,7 +187,7 @@
   (loop with last-read = (read-chr strm)
         while (and
                 (not (eq last-read +eof+))
-                (not (eql last-read #\Newline)))
+                (not (char= last-read #\Newline)))
         do
         (setf last-read (read-chr strm))
         finally
@@ -197,7 +195,7 @@
 
 (defun extract-sep (strm chr pred)
   (declare (type streamable strm)
-           (type (or character (eql +eof+)) chr)
+           (type streamed chr)
            (type function pred))
   (loop with just-read = nil
         with next = chr
@@ -258,13 +256,13 @@
         while (and
                 (not (eq next +eof+))
                 (eql next chr)
-                (not (eql next #\^)))
+                (not (char= next #\^)))
         do
         (setf last-read (read-chr strm))
         (setf next (peek-chr strm))
         (loop named getline
               while (and (not (eq next +eof+))
-                         (not (eql next #\Newline)))
+                         (not (char= next #\Newline)))
               do
               (setf last-read (read-chr strm))
               (push last-read building)
@@ -283,7 +281,7 @@
         (setf next (peek-chr strm))
 
         finally (progn
-                  (unless (eql next #\^)
+                  (unless (char= next #\^)
                     (error 'nrdl-error "Must end multiline blob with a caret"))
                   (read-chr strm)
                   (return-from toplevel (build-string (cdr building))))))
@@ -404,17 +402,17 @@
   (or
     (and (typep chr 'character)
          (alpha-char-p chr))
-    (eql chr #\_)
-    (eql chr #\=)
-    (eql chr #\>)
-    (eql chr #\@)
-    (eql chr #\$)
-    (eql chr #\%)
-    (eql chr #\&)
-    (eql chr #\*)
-    (eql chr #\+)
-    (eql chr #\/)
-    (eql chr #\=)))
+    (char= chr #\_)
+    (char= chr #\=)
+    (char= chr #\>)
+    (char= chr #\@)
+    (char= chr #\$)
+    (char= chr #\%)
+    (char= chr #\&)
+    (char= chr #\*)
+    (char= chr #\+)
+    (char= chr #\/)
+    (char= chr #\=)))
 
 (defun bareword-middle-p (chr)
   (declare (type streamed chr))
@@ -422,11 +420,11 @@
     (bareword-start-p chr)
     (and (typep chr 'character)
          (digit-char-p chr))
-    (eql chr #\<)
-    (eql chr #\!)
-    (eql chr #\?)
-    (eql chr #\.)
-    (eql chr #\-)))
+    (char= chr #\<)
+    (char= chr #\!)
+    (char= chr #\?)
+    (char= chr #\.)
+    (char= chr #\-)))
 
 (defun convert-to-symbol (final-string)
   (declare (type string final-string))
@@ -469,13 +467,13 @@
   (declare (type streamable strm)
            (type streamed chr))
   (cond
-        ((eql chr #\{)
+        ((char= chr #\{)
          (extract-hash strm chr))
-        ((eql chr #\[)
+        ((char= chr #\[)
          (extract-array strm chr))
-        ((eql chr #\")
+        ((char= chr #\")
          (extract-quoted-blob strm chr))
-        ((eql chr #\`)
+        ((char= chr #\`)
          (extract-quoted-symbol strm chr))
         ((or
            (eql chr +start-verbatim+)
@@ -499,7 +497,7 @@
         with next = (peek-chr strm)
         while (and
                 (not (eq next +eof+))
-                (not (eql next #\])))
+                (not (char= next #\])))
         do
         (unless found-sep
           (error
@@ -514,7 +512,7 @@
         finally
         (progn (when (and
                        (not (eq next +eof+))
-                       (eql next #\]))
+                       (char= next #\]))
                   (read-chr strm))
                   (return (reverse building)))))
 
@@ -529,7 +527,7 @@
         with next = (peek-chr strm)
         while (and
                 (not (eq next +eof+))
-                (not (eql next #\})))
+                (not (char= next #\})))
         do
         (unless found-sep
           (error 'nrdl-error
@@ -552,7 +550,7 @@
         (setf next (peek-chr strm))
         finally (when (and
                         (not (eq next +eof+))
-                        (eql next #\}))
+                        (char= next #\}))
                   (read-chr strm))
                   (return
                   (alexandria:plist-hash-table
@@ -742,7 +740,7 @@
           for pos from 0 to (- (length blob) 1)
           do
           (when (and
-                  (eql c #\Space)
+                  (char= c #\Space)
                   (or
                     (null break-spot)
                     (< pos max-width)))
@@ -908,7 +906,7 @@
 
     (if (> (count-if (lambda (x)
                        (or
-                         (eql x #\Space)
+                         (char= x #\Space)
                          (escapable-p x #\`)))
                      prop-content) 0)
       (inject-quoted strm prop-content #\`)
