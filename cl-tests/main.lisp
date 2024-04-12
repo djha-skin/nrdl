@@ -11,6 +11,7 @@
     (asdf:load-system "com.djhaskin.nrdl")
     (asdf:test-system "com.djhaskin.nrdl")))
 
+
 (in-package #:cl-user)
 
 (defpackage #:com.djhaskin.nrdl/tests
@@ -77,6 +78,7 @@
           (:DESTINATION . "yon")
           (:ORIGIN . "thither")) (C 1 2 3 4 5))))
 
+
 (define-test parse-tests)
 
 (define-test "parse: empty"
@@ -86,8 +88,8 @@
         (with-input-from-string (strm "")
           (nrdl:parse-from strm))
         (fail "Should have thrown an error"))
-    (nrdl:parse-error (e) (true sig))
-    (t (sig) (fail "Should have thrown a parse-error"))))
+    (nrdl:nrdl-error (e) (true e))
+    (t (e) (declare (ignore e)) (fail "Should have thrown a nrdl-error"))))
 
 (define-test "parse: simple"
   :parent parse-tests
