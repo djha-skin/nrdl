@@ -31,12 +31,37 @@
 
 (defconstant +eof+ :eof)
 
-(deftype streamable (or boolean stream)
-  "A common lisp stream.")
+(deftype streamable ()
+  '(or boolean stream))
 
-(deftype streamed (or character (member +eof+)))
+(deftype streamed ()
+  `(or character (member ,+eof+)))
 
-(define-condition nrdl-error (error) ())
+;;; TODO
+
+
+(define-condition nrdl-error (error)
+  ((expected-chars :initarg :expected-chars :reader expected-chars)
+   (got-char :initarg :got-char :reader got-char))
+  (:report
+   (lambda (c s)
+     (format s
+             "Expected~v[ nothing~; ~:;one of ~]~{`~:C`~^~#[~;, or ~:;, ~]~}; got `~:C`"
+             (list-length (expected-chars c))
+             (expected-chars c)
+             (got-char c)))))
+
+;; TODO MAKE THESE TESTS
++(or)
+(progn
+  (make-condition 'nrdl-error :expected-chars '(#\a #\b #\c #\Space) :got-char #\d)
+  (make-condition 'nrdl-error :expected-chars '() :got-char #\d)
+  (make-condition 'nrdl-error :expected-chars '(#\Newline) :got-char #\d)
+  (format t "~A" *)
+  )
+
+;; TODO write a function to construct different types of errors out of the above
+;; condition
 
 
 (defun peek-chr (strm)
@@ -467,6 +492,7 @@
   (declare (type streamable strm)
            (type streamed chr))
   (cond
+        ((eq chr +eof+) (error 'nrdl-error "No value"))
         ((char= chr #\{)
          (extract-hash strm chr))
         ((char= chr #\[)
@@ -531,7 +557,7 @@
         do
         (unless found-sep
           (error 'nrdl-error
-            "No separating whitespace found at character `~A`."
+            "Expected separating whitespace found at character `~A`."
             next))
         (push (extract-value strm next) building)
         (setf last-read (extract-list-sep strm (peek-chr strm)))

@@ -39,6 +39,8 @@
 
 (define-test nested-to-alist)
 
+(test *)
+
 (define-test "nested-to-alist: empty cases"
   :parent nested-to-alist
   (is eq nil (nrdl:nested-to-alist nil))
@@ -77,7 +79,6 @@
         (B
           (:DESTINATION . "yon")
           (:ORIGIN . "thither")) (C 1 2 3 4 5))))
-
 
 (define-test parse-tests)
 
