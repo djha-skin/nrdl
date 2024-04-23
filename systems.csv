@@ -8,3 +8,4 @@ documentation-utils, ghcr.io/ocicl/documentation-utils@sha256:b2a1b3f3bcd1a738af
 trivial-indent, ghcr.io/ocicl/trivial-indent@sha256:6fe5b8470816a715113c0f123d41d52fc2782309fd5fc33a494dd887c6c677ce, trivial-indent-20230809-b5d490f/trivial-indent.asd
 trivial-custom-debugger, ghcr.io/ocicl/trivial-custom-debugger@sha256:b140bab2b1a923705a71e09cd40187cc0efebbe2ebf63223ae2ec2a968eeb8b7, trivial-custom-debugger-20230814-802473c/trivial-custom-debugger.asd
 form-fiddle, ghcr.io/ocicl/form-fiddle@sha256:af4af44d88dc68ca2b86a2c906ef9e632063a4d52aa68577a5fba8230f07d1f3, form-fiddle-20230809-3bd0dfd/form-fiddle.asd
+trivial-ed-functions, ghcr.io/ocicl/trivial-ed-functions@sha256:e801a0753a08abfbcaa88224bab551f6af04798d10c5c86399687456e7a7ed9c, trivial-ed-functions-20230808-21502e0/trivial-ed-functions.asd

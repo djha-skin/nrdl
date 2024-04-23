@@ -18,7 +18,7 @@
   :author "Daniel Jay Haskin"
   :license "MIT"
   :depends-on (
-               "nrdl"
+               "com.djhaskin.nrdl"
                "parachute")
   :components ((:module "cl-tests"
                 :components

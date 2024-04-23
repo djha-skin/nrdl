@@ -2,13 +2,16 @@
 ;;;;
 ;;;; SPDX-FileCopyrightText: 2024 Daniel Jay Haskin
 ;;;; SPDX-License-Identifier: MIT
+;;;;
 
 #+(or)
+
 (progn
-  (declaim (optimize (speed 0) (space 0) (debug 3))
-           (asdf:load-system "alexandria")))
+  (declaim (optimize (speed 0) (space 0) (debug 3)))
+           (asdf:load-system "alexandria"))
 
 (in-package #:cl-user)
+
 (defpackage
   #:com.djhaskin.nrdl (:use #:cl)
   (:documentation
@@ -17,7 +20,7 @@
     ")
     (:import-from #:alexandria)
     (:export
-      nrdl-error
+      extract-error
       parse-from
       generate-to
       nested-to-alist
@@ -37,32 +40,50 @@
 (deftype streamed ()
   `(or character (member ,+eof+)))
 
-;;; TODO
+
+(defun nameof (c)
+  (cond c
+        ((eq c +eof+)
+         (format nil "EOF"))
+        ((typep gotc 'character)
+         (format nil "~:C" c))
+        (t
+         (format nil "~A" c))))
 
 
-(define-condition nrdl-error (error)
+(define-condition extract-error (error)
   ((expected-chars :initarg :expected-chars :reader expected-chars)
    (got-char :initarg :got-char :reader got-char))
   (:report
    (lambda (c s)
+     (let* ((gotc (got-char c))
+            (got-message
+              ))
+     (let ((got-message
+             (typecase (got-char c)
+               (
+     (if (zerop (length c))
+         (format 
+
+     (loop for c in (expected-chars c)
+           do
+           (typecase c
+             (character 
      (format s
-             "Expected~v[ nothing~; ~:;one of ~]~{`~:C`~^~#[~;, or ~:;, ~]~}; got `~:C`"
+             "Expected ~v[nothing~;~:;one of ~]~{`~:C`~^~#[~; or ~:;, ~]~}; got `~:C`"
              (list-length (expected-chars c))
              (expected-chars c)
              (got-char c)))))
 
-;; TODO MAKE THESE TESTS
-+(or)
-(progn
-  (make-condition 'nrdl-error :expected-chars '(#\a #\b #\c #\Space) :got-char #\d)
-  (make-condition 'nrdl-error :expected-chars '() :got-char #\d)
-  (make-condition 'nrdl-error :expected-chars '(#\Newline) :got-char #\d)
-  (format t "~A" *)
-  )
-
 ;; TODO write a function to construct different types of errors out of the above
 ;; condition
 
+
+(defun expected-whitespace (chr)
+  (declare (type streamed chr))
+  (error 'extract-error
+         :expected-chars '(#\Space #\Tab #\Newline #\Return #\Page)
+         :got-char chr))
 
 (defun peek-chr (strm)
   (declare (type streamable strm))
@@ -1074,4 +1095,3 @@
                                           (format nil "~A" (car thing))))))
     (t
       value)))
-

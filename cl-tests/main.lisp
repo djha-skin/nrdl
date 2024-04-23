@@ -37,6 +37,23 @@
 
 (in-package #:com.djhaskin.nrdl/tests)
 
+(define-test extract-errors)
+
+(define-test "extract-errors: simple cases"
+  :parent extract-errors
+  (is equal
+      (format nil "~A" (make-condition 'nrdl:extract-error :expected-chars '(#\a #\b #\c #\Space) :got-char #\d))
+      "Expected one of `a`, `b`, `c` or `Space`; got `d`")
+  (is equal
+      (format nil "~A" (make-condition 'nrdl:extract-error :expected-chars '() :got-char #\d))
+      "Expected nothing; got `d`")
+  (is equal
+      (format nil "~A" (make-condition 'nrdl:extract-error :expected-chars '(#\a #\Space) :got-char #\d))
+      "Expected one of `a` or `Space`; got `d`")
+  (is equal
+      (format nil "~A" (make-condition 'nrdl:extract-error :expected-chars '(#\Newline) :got-char #\d))
+      "Expected `Newline`; got `d`"))
+
 (define-test nested-to-alist)
 
 (test *)
