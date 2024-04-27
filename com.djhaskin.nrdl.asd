@@ -1,5 +1,5 @@
 (defsystem "com.djhaskin.nrdl"
-  :version "0.4.0"
+  :version "0.5.0"
   :author "Daniel Jay Haskin"
   :license "MIT"
   :depends-on (
@@ -14,7 +14,7 @@
                 (test-op (test-op "com.djhaskin.nrdl/tests"))))
 
 (defsystem "com.djhaskin.nrdl/tests"
-  :version "0.4.0"
+  :version "0.5.0"
   :author "Daniel Jay Haskin"
   :license "MIT"
   :depends-on (
