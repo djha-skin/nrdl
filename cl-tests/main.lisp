@@ -3,14 +3,21 @@
 ;;;; SPDX-FileCopyrightText: 2024 Daniel Jay Haskin
 ;;;; SPDX-License-Identifier: MIT
 
+
 #+(or)
+
 (progn
   (declaim (optimize (speed 0) (space 0) (debug 3)))
   (progn
-    (asdf:load-system "parachute")
-    (asdf:load-system "com.djhaskin.nrdl")
-    (asdf:test-system "com.djhaskin.nrdl")))
 
+    (asdf:load-system "parachute")
+
+    (asdf:load-system "com.djhaskin.nrdl")
+
+    (asdf:test-system "com.djhaskin.nrdl")
+
+    )
+  )
 
 (in-package #:cl-user)
 
@@ -37,26 +44,47 @@
 
 (in-package #:com.djhaskin.nrdl/tests)
 
-(define-test extract-errors)
+(define-test extraction-errors)
 
-(define-test "extract-errors: simple cases"
-  :parent extract-errors
+(define-test "extraction-errors: simple cases"
+  :parent extraction-errors
   (is equal
-      (format nil "~A" (make-condition 'nrdl:extract-error :expected-chars '(#\a #\b #\c #\Space) :got-char #\d))
-      "Expected one of `a`, `b`, `c` or `Space`; got `d`")
+      "Expected one of `a`, `b`, `c` or `Space`; got `d`"
+      (format nil "~A"
+              (make-condition
+                'nrdl:extraction-error
+                :expected '(#\a #\b #\c #\Space)
+                :got #\d)))
+
   (is equal
-      (format nil "~A" (make-condition 'nrdl:extract-error :expected-chars '() :got-char #\d))
-      "Expected nothing; got `d`")
+      "Expected nothing; got `d`"
+      (format nil "~A"
+              (make-condition 'nrdl:extraction-error
+                              :expected '()
+                              :got #\d)))
   (is equal
-      (format nil "~A" (make-condition 'nrdl:extract-error :expected-chars '(#\a #\Space) :got-char #\d))
-      "Expected one of `a` or `Space`; got `d`")
+      "Expected one of `a` or `Space`; got `d`"
+      (format nil "~A"
+              (make-condition
+                'nrdl:extraction-error
+                :expected '(#\a #\Space)
+                :got #\d)))
   (is equal
-      (format nil "~A" (make-condition 'nrdl:extract-error :expected-chars '(#\Newline) :got-char #\d))
-      "Expected `Newline`; got `d`"))
+      "Expected `Newline`; got `d`"
+      (format nil "~A"
+              (make-condition
+                'nrdl:extraction-error
+                :expected '(#\Newline)
+                :got #\d)))
+  (is equal
+      "Expected one of `EOF`, `Newline`, `:`, `,` or `start of number`; got `d`"
+      (format nil "~A"
+              (make-condition
+                'nrdl:extraction-error
+                :expected '(:eof #\Newline #\: #\, "start of number")
+                :got #\d))))
 
 (define-test nested-to-alist)
-
-(test *)
 
 (define-test "nested-to-alist: empty cases"
   :parent nested-to-alist
@@ -75,15 +103,19 @@
   :parent nested-to-alist
   (is
     equal
+    '(1 2 3 (4 5) 6 (7 (8 ((A . 1) (B . 2) (C . 3)))))
     (let
         ((a (make-hash-table)))
       (setf (gethash 'a a) 1)
       (setf (gethash 'b a) 2)
       (setf (gethash 'c a) 3)
       (nrdl:nested-to-alist
-        `(1 2 3 (4 5) 6 (7 (8 ,a)))))
-    '(1 2 3 (4 5) 6 (7 (8 ((A . 1) (B . 2) (C . 3))))))
+        `(1 2 3 (4 5) 6 (7 (8 ,a))))))
   (is equal
+      '((A)
+        (B
+          (:DESTINATION . "yon")
+          (:ORIGIN . "thither")) (C 1 2 3 4 5))
       (let ((a (make-hash-table))
             (b (make-hash-table)))
         (setf (gethash :origin b) "thither")
@@ -92,10 +124,7 @@
         (setf (gethash 'b a) b)
         (setf (gethash 'c a) '(1 2 3 4 5))
         (nrdl:nested-to-alist a))
-      '((A)
-        (B
-          (:DESTINATION . "yon")
-          (:ORIGIN . "thither")) (C 1 2 3 4 5))))
+      ))
 
 (define-test parse-tests)
 
@@ -106,8 +135,8 @@
         (with-input-from-string (strm "")
           (nrdl:parse-from strm))
         (fail "Should have thrown an error"))
-    (nrdl:nrdl-error (e) (true e))
-    (t (e) (declare (ignore e)) (fail "Should have thrown a nrdl-error"))))
+    (nrdl:extraction-error (e) (true e))
+    (t (e) (declare (ignore e)) (fail "Should have thrown an extradction error"))))
 
 (define-test "parse: simple"
   :parent parse-tests
@@ -323,8 +352,10 @@
       (nrdl:generate-to strm *sparrow-object* :pretty-indent 4))
         *pretty-sparrow*))
 
+(defpackage #:com.djhaskin.nrdl/test-intern-package)
+
 (defparameter *test-intern-package*
-  (defpackage #:com.djhaskin.nrdl/test-intern-package))
+  (find-package '#:com.djhaskin.nrdl/test-intern-package))
 
 (defparameter *sparrow-alist-different-package*
   `((COM.DJHASKIN.NRDL/TEST-INTERN-PACKAGE::|FORCE PUSH|

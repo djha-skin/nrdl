@@ -6,7 +6,7 @@
 
 #+(or)
 
-(progn
+(prog
   (declaim (optimize (speed 0) (space 0) (debug 3)))
            (asdf:load-system "alexandria"))
 
@@ -20,7 +20,7 @@
     ")
     (:import-from #:alexandria)
     (:export
-      extract-error
+      extraction-error
       parse-from
       generate-to
       nested-to-alist
@@ -40,50 +40,28 @@
 (deftype streamed ()
   `(or character (member ,+eof+)))
 
-
 (defun nameof (c)
-  (cond c
-        ((eq c +eof+)
-         (format nil "EOF"))
-        ((typep gotc 'character)
-         (format nil "~:C" c))
-        (t
-         (format nil "~A" c))))
+  (cond
+    ((eq c +eof+)
+     "EOF")
+    ((typep c 'character)
+     (format nil "~:C" c))
+    (t
+     (format nil "~A" c))))
 
-
-(define-condition extract-error (error)
-  ((expected-chars :initarg :expected-chars :reader expected-chars)
-   (got-char :initarg :got-char :reader got-char))
+(define-condition extraction-error (error)
+  ((expected :initarg :expected :reader expected)
+   (got :initarg :got :reader got))
   (:report
    (lambda (c s)
-     (let* ((gotc (got-char c))
-            (got-message
-              ))
-     (let ((got-message
-             (typecase (got-char c)
-               (
-     (if (zerop (length c))
-         (format 
-
-     (loop for c in (expected-chars c)
-           do
-           (typecase c
-             (character 
-     (format s
-             "Expected ~v[nothing~;~:;one of ~]~{`~:C`~^~#[~; or ~:;, ~]~}; got `~:C`"
-             (list-length (expected-chars c))
-             (expected-chars c)
-             (got-char c)))))
-
-;; TODO write a function to construct different types of errors out of the above
-;; condition
-
-
-(defun expected-whitespace (chr)
-  (declare (type streamed chr))
-  (error 'extract-error
-         :expected-chars '(#\Space #\Tab #\Newline #\Return #\Page)
-         :got-char chr))
+     (let* ((gotc (got c))
+            (gotc-title (nameof gotc))
+            (expected (expected c)))
+       (format s
+             "Expected ~v[nothing~;~:;one of ~]~{`~A`~^~#[~; or ~:;, ~]~}; got `~A`"
+             (length expected)
+             (mapcar #'nameof expected)
+             gotc-title)))))
 
 (defun peek-chr (strm)
   (declare (type streamable strm))
@@ -187,7 +165,19 @@
                             (setf (elt build-ordinal 5) (must-read-chr strm))
                             (read-from-string build-ordinal nil nil)))
                         building))
-                     (t (error 'nrdl-error "Unknown escape char: ~A"
+                     (t (error
+                          'extraction-error
+                          :expected
+                          '(#\"
+                            #\\
+                            #\/
+                            #\b
+                            #\f
+                            #\n
+                            #\r
+                            #\t
+                            #\u)
+                          :got 
                                last-read))))
             (push last-read building))
           (setf last-read (must-read-chr strm)))
@@ -328,7 +318,7 @@
 
         finally (progn
                   (unless (char= next #\^)
-                    (error 'nrdl-error "Must end multiline blob with a caret"))
+                    (error 'extraction-error :expected #\^ :got next))
                   (read-chr strm)
                   (return-from toplevel (build-string (cdr building))))))
 
@@ -513,25 +503,48 @@
   (declare (type streamable strm)
            (type streamed chr))
   (cond
-        ((eq chr +eof+) (error 'nrdl-error "No value"))
-        ((char= chr #\{)
-         (extract-hash strm chr))
-        ((char= chr #\[)
-         (extract-array strm chr))
-        ((char= chr #\")
-         (extract-quoted-blob strm chr))
-        ((char= chr #\`)
-         (extract-quoted-symbol strm chr))
-        ((or
-           (eql chr +start-verbatim+)
-           (eql chr +start-prose+))
-         (extract-multiline-blob strm chr))
-        ((number-start-p chr)
-         (extract-number strm chr))
-        ((bareword-start-p chr)
-         (extract-bare-symbol strm chr))
-        (t (error 'nrdl-error "Invalid token starting with character `~A`"
-                  chr))))
+    ((eq chr +eof+) (error
+                      'extraction-error
+                      :expected
+                      '(#\{
+                        #\[
+                        #\"
+                        #\`
+                        +start-verbatim+
+                        +start-prose+
+                        "start of number"
+                        "start of bareword")
+                      :got
+                      +eof+))
+    ((char= chr #\{)
+     (extract-hash strm chr))
+    ((char= chr #\[)
+     (extract-array strm chr))
+    ((char= chr #\")
+     (extract-quoted-blob strm chr))
+    ((char= chr #\`)
+     (extract-quoted-symbol strm chr))
+    ((or
+       (eql chr +start-verbatim+)
+       (eql chr +start-prose+))
+     (extract-multiline-blob strm chr))
+    ((number-start-p chr)
+     (extract-number strm chr))
+    ((bareword-start-p chr)
+     (extract-bare-symbol strm chr))
+    (t (error
+         'extraction-error
+         :expected
+         '(#\{
+           #\[
+           #\"
+           #\`
+           +start-verbatim+
+           +start-prose+
+           "start of number"
+           "start of bareword")
+         :got
+         chr))))
 
 (defun extract-array (strm chr)
   (declare (type streamable strm)
@@ -547,11 +560,9 @@
                 (not (char= next #\])))
         do
         (unless found-sep
-          (error
-            'nrdl-error
-            "No separating whitespace found at character `~A`."
-            next)
-          )
+          (error 'extraction-error
+                 :expected '(#\Space #\Tab #\Newline #\Return #\, #\:)
+                 :got next))
         (push (extract-value strm next) building)
         (setf last-read (extract-list-sep strm (peek-chr strm)))
         (setf found-sep (guarded-sepchar-p last-read))
@@ -560,8 +571,8 @@
         (progn (when (and
                        (not (eq next +eof+))
                        (char= next #\]))
-                  (read-chr strm))
-                  (return (reverse building)))))
+                 (read-chr strm))
+               (return (reverse building)))))
 
 (defun extract-hash (strm chr)
   (declare (type streamable strm)
@@ -577,20 +588,17 @@
                 (not (char= next #\})))
         do
         (unless found-sep
-          (error 'nrdl-error
-            "Expected separating whitespace found at character `~A`."
-            next))
+          (error 'extraction-error
+                 :expected '(#\Space #\Tab #\Newline #\Return #\, #\:)
+                 :got next))
         (push (extract-value strm next) building)
         (setf last-read (extract-list-sep strm (peek-chr strm)))
         (setf found-sep (guarded-sepchar-p last-read))
         (setf next (peek-chr strm))
         (unless found-sep
-          (error 'nrdl-error
-            (concatenate
-              'string
-              "While looking for val in plist, failed to find separator "
-              "whitespace at character `~A`")
-            next))
+          (error 'extraction-error
+                 :expected '(#\Space #\Tab #\Newline #\Return #\, #\:)
+                 :got next))
         (push (extract-value strm next) building)
         (setf last-read (extract-list-sep strm (peek-chr strm)))
         (setf found-sep (guarded-sepchar-p last-read))
@@ -599,36 +607,36 @@
                         (not (eq next +eof+))
                         (char= next #\}))
                   (read-chr strm))
-                  (return
-                  (alexandria:plist-hash-table
-                  (reverse building)
-                  :test #'equal))))
+        (return
+          (alexandria:plist-hash-table
+            (reverse building)
+            :test #'equal))))
 #|
 (nrdl:parse-from t)
 # What now brown cow
 {
 
-   the-wind "bullseye"
-   the-trees false
-   the-sparrows his-eye
-   poem
-    # I don't know if you can hear me
-      |His eyee
-    # or if
-    # you're even there
-      |is on
-    # I don't know if you can listen
-      |The sparrow
-      ^
+the-wind "bullseye"
+the-trees false
+the-sparrows his-eye
+poem
+# I don't know if you can hear me
+|His eyee
+# or if
+# you're even there
+|is on
+# I don't know if you can listen
+|The sparrow
+^
 
-    # to a gypsy's prayer
+# to a gypsy's prayer
 
-   this-should-still-work 15.0
-   other
-      |And I know
-      |He's watching
-      |Over me
-      ^
+this-should-still-work 15.0
+other
+|And I know
+|He's watching
+|Over me
+^
 
    `force push` >I sing
                 >because

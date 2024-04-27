@@ -25,6 +25,7 @@
                 ((:file "main"))))
   :description "Test system for NRDL"
   :perform (asdf:test-op (op c)
+
                          (uiop:symbol-call
                            :parachute
                            :test :com.djhaskin.nrdl/tests)))

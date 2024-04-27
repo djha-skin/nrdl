@@ -16,5 +16,5 @@ exec ros -Q -- $0 "$@"
 
 (defun main (&rest argv)
   (declare (ignorable argv))
-  (generate-to t '(1 2 3) 4))
+  (generate-to t '(1 2 3) :pretty-indent 4))
 ;;; vim: set ft=lisp lisp:

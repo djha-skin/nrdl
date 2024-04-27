@@ -20,6 +20,7 @@
 /.slime_paste
 
 # Lisp stuff
+/com.djhaskin.nrdl
 /.repl/ros_history
 /.qlot/
 /systems/
