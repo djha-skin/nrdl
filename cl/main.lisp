@@ -994,7 +994,6 @@ other
     (symbol (cond ((eql (print prop) 'cl:null)
                         (write-string "null" strm))
                   (t (error
-                       'nrdl-error
                        "Writing symbols to NRDL is undefined"))))))
 
 (defun inject-array (strm seq pretty-indent indented-at
