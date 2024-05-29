@@ -6,9 +6,11 @@
 
 #+(or)
 
-(prog
+(progn
   (declaim (optimize (speed 0) (space 0) (debug 3)))
-           (asdf:load-system "alexandria"))
+           (asdf:load-system "alexandria")
+           (asdf:load-system "fset"))
+
 
 (in-package #:cl-user)
 
