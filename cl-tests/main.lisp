@@ -410,3 +410,9 @@
           (let ((nrdl:*symbol-package* *test-intern-package*))
             (nrdl:parse-from strm))))
       *sparrow-alist-different-package*))
+
+
+(with-input-from-string
+    (strm *pretty-sparrow*)
+  (nrdl:to-fset
+    (nrdl:parse-from strm)))
