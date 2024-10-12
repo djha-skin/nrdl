@@ -348,12 +348,6 @@ keys.
 
 Check out the [vim NRDL plugin](https://git.djha.skin/me/vim-nrdl.git).
 
-## Community
-
-NRDL has its own [Matrix channel (`nrdl:matrix.org`)](https://matrix.to/#/!mEdAmGzxTrQPWAYdfx:matrix.org?via=matrix.org).
-NRDL also has an IRC channel on Libera.Chat, `#nrdl`. The matrix channel is
-preferred.
-
 ## Acknowledgements and Comparisons
 
 This format was the result of a lot of research into how other serialization
@@ -480,6 +474,26 @@ the file. It provides a single symbol type, corresponding to atomic strings
 commonly found in data within the Lisp family. It also respects the design
 trade-off that JSON made to just specify "numbers" and have the target language
 figure out what that means.
+
+## How to Contribute
+
+Thanks for reading this far! If you are interested in joining the effort, I
+would be more than happy for the help. Thanks for your consideration.
+
+Here are some things I'd like to see for NRDL some day:
+
+* A logo. I am no graphic designer. If you make a logo and it looks pretty good,
+  I would be happy to add it to the repo and the matrix channel.
+* Multiple implementations in multiple languages. I have implemented the Common
+  Lisp implementation, but I would like to see one in C, Scheme, Janet, Elixir,
+  etc. I'd be happy to add your implementation to this repository as the standard
+  if you wish to implement such a parser.
+
+## Community
+
+NRDL has its own [Matrix channel (`nrdl:matrix.org`)](https://matrix.to/#/!mEdAmGzxTrQPWAYdfx:matrix.org?via=matrix.org).
+NRDL also has an IRC channel on Libera.Chat, `#nrdl`. The matrix channel is
+preferred.
 
 ## ABNF
 
