@@ -316,10 +316,13 @@ keys.
     lookahead.
   - Documents can be nested in other documents without changing their content or
     adding a bunch of backslashes everywhere, just like YAML.
-  - Comments work the same as YAML.
+  - Comments work as good or _better_ than they do in YAML, since they can be
+    interleaved with multi-line strings and object in a way that is often
+    impossible in YAML.
   - Unlike YAML, it is syntactically specified. This allows editors to help with
     formatting and navigation. This is especially helpful when documents become
-    large.
+    large. It also solves odd corner cases where YAML comment's can't appear in
+    specific places in the file without confusing the parser.
   - Symbols as a data type is introduced, allowing for easier parsing in typed
     languages and keyword/symbol representation in Lisps and others.
 
