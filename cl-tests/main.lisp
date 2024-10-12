@@ -412,7 +412,7 @@
       *sparrow-alist-different-package*))
 
 
-(with-input-from-string
-    (strm *pretty-sparrow*)
-  (nrdl:to-fset
-    (nrdl:parse-from strm)))
+;;; (with-input-from-string
+;;;     (strm *pretty-sparrow*)
+;;;   (nrdl:to-fset
+;;;     (nrdl:parse-from strm)))
