@@ -1,4 +1,4 @@
-# NeRDL: NEstable, Readable Document Language
+# NRDL: The Nestable, Readable Document Language
 
 This repository houses the Nestable Readable Document Language. It is a JSON
 superset that was specifically written to be:
@@ -8,7 +8,7 @@ superset that was specifically written to be:
 - Good enough to replace YAML.
 - Generic enough to be useful from any programming language.
 - Featureful enough to support the functional languages, particularly those in
-  the Lisp family (supports keywords/symbols/atoms).
+  the Lisp family (it supports keywords/symbols/atoms).
 
 **Join the [Matrix channel (`nrdl:matrix.org`)](https://matrix.to/#/!mEdAmGzxTrQPWAYdfx:matrix.org?via=matrix.org)!**
 
