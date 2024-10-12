@@ -1,8 +1,18 @@
 # NeRDL: NEstable, Readable Document Language
 
-This repository houses the Nestable Readable Document Language.
-## Example Document
+This repository houses the Nestable Readable Document Language. It is a JSON
+superset that was specifically written to be:
 
+- Simple to implement.
+- Easy to read.
+- Good enough to replace YAML.
+- Generic enough to be useful from any programming language.
+- Featureful enough to support the functional languages, particularly those in
+  the Lisp family.
+
+**Join the [Matrix channel (`nrdl:matrix.org`)](https://matrix.to/#/!mEdAmGzxTrQPWAYdfx:matrix.org?via=matrix.org)!**
+
+## Example Document
 
 ```nrdl
 # What now brown cow
@@ -71,7 +81,6 @@ This repository houses the Nestable Readable Document Language.
 }
 
 ```
-
 ## Rationale
 
 This is a language I made up because I am writing a command line tool
@@ -79,48 +88,16 @@ framework and I need a language for it to both read configuration from and
 use also to write its output to standard output.
 
 Normally, YAML would be perfect for this; however, in Common Lisp, YAML means
-using libyaml and the CFFI, which I wish to avoid. Instead, I wrote this
-language myself.
+using libyaml and the CFFI, which I wish to avoid.
 
 I needed a language that has nestable documents and also have the language be
-pleasing to the eye, like you can do in YAML. However, I didn't want to spend
-too much time writing a document parser and printer. YAML is very
+pleasing to the eye, like is often done with YAML. However, I didn't want to
+spend too much time writing a document parser and printer. YAML is very
 complicated. I didn't need a lot of its features.
 
 So I wrote NRDL. Nestable, because you can have nestable documents in it.
 Readable, because it's easy both to parse mechanically and is (or can be)
 pleasing to the eye.
-
-## Design Tradeoffs
-
-### Advantages
-
-  - Easy to learn for users, with familiar syntax that matches what is used
-    elsewhere.
-  - Easy enough to read that it is usable as a configuration language.
-  - Very easy to parse for implementers, requiring only single-character
-    lookahead.
-  - Documents can be nested in other documents without changing their content or
-    adding a bunch of backslashes everywhere, just like YAML.
-  - Comments work the same as YAML.
-  - Unlike YAML, it is syntactically specified. This allows editors to help with
-    formatting and navigation. This is especially helpful when documents become
-    large.
-  - Symbols as a data type is introduced, allowing for easier parsing in typed
-    languages and keyword/symbol representation in Lisps and others.
-
-### Caveats
-
-  - Many of the same disadvantages carry over from JSON:
-    - If a NRDL document is slurped in, it cannot be printed out again and still
-      have it be the same as it was before. This is because order of the keys is
-      lost in the parsing process, as are comments.
-    - Care must be taken when desigining APIs because order is not guaranteed in
-      objects.
-    - Infinity and NaN are not defined.
-  - Prose doesn't compress multiple whitespace characters at the end of the line
-    into one character, as YAML does. This is to ease parsing and keep the
-    language simple.
 
 ## Overview
 
@@ -327,22 +304,182 @@ the following guidelines:
         simply be decoded into normal strings without consequence. This category
         includes Python, Perl, PHP, etc.
 
-Note a caveat of this design decision. the literals <code>`true`</code> and `true` are
-equivalent, and should be treated the same as each other. The same goes for
-<code>\`false\`</code> and `false`, and <code>\`null\`</code> and `null`.
-
 Symbols can be used as keys or values, but they are especially useful as object
 keys.
+
+## Advantages
+
+  - Easy to learn for users, with familiar syntax that matches what is used
+    elsewhere.
+  - Easy enough to read that it is usable as a configuration language.
+  - Very easy to parse for implementers, requiring only single-character
+    lookahead.
+  - Documents can be nested in other documents without changing their content or
+    adding a bunch of backslashes everywhere, just like YAML.
+  - Comments work the same as YAML.
+  - Unlike YAML, it is syntactically specified. This allows editors to help with
+    formatting and navigation. This is especially helpful when documents become
+    large.
+  - Symbols as a data type is introduced, allowing for easier parsing in typed
+    languages and keyword/symbol representation in Lisps and others.
+
+## Caveats
+
+  - Many of the same disadvantages carry over from JSON:
+    - If a NRDL document is deserialized, it cannot be serialized again and still
+      have it be the same byte-for-byte as it was before. This is because order
+      of the keys is lost in the parsing process, as are comments.
+    - Care must be taken when desigining APIs because order is not guaranteed in
+      objects.
+    - Infinity and NaN are not defined.
+  - Prose doesn't compress multiple whitespace characters at the end of the line
+    into one character, as YAML does. This is to ease parsing and keep the
+    language simple.
+  - The literals <code>\`true\`</code> and `true` are equivalent, and should be
+    treated the same as each other. The same goes for <code>\`false\`</code> and
+    `false`, and <code>\`null\`</code> and `null`. This is, again, in service of
+    ensuring that implementing a parser is simple.
+  - Adding a caret (`^`) at the end of multi-line strings is important in order
+    to ensure that NRDL is an [_LL(1)_
+    language](https://en.wikipedia.org/wiki/LL_parser), ensuring implementation
+    simplicity. It can also be mildly annoying though.
 
 ## Supporting Resources
 
 Check out the [vim NRDL plugin](https://git.djha.skin/me/vim-nrdl.git).
 
-## Contact Me
+## Community
 
-I am `skin` on the `#commonlisp` IRC channel on libera.chat and elsewhere. If
-this becomes popular, I will maintain an IRC channel on that server, `#nrdl`,
-where people can come and ask questions.
+NRDL has its own [Matrix channel (`nrdl:matrix.org`)](https://matrix.to/#/!mEdAmGzxTrQPWAYdfx:matrix.org?via=matrix.org).
+NRDL also has an IRC channel on Libera.Chat, `#nrdl`. The matrix channel is
+preferred.
+
+## Acknowledgements and Comparisons
+
+This format was the result of a lot of research into how other serialization
+languages solved the same problems which I wished to solve with NRDL. These
+earlier languages had serious advantages and represented rock-solid design
+decisions. They also have shortcomings, which is why NRDL was written.
+
+### JSON
+
+From hindsight, JSON seems obvious -- or horrifying -- depending on who is
+asked. Having delved the depths of serialization, and beholding its horrors, I
+am in awe of the [JSON standard](https://datatracker.ietf.org/doc/html/rfc8259).
+It strikes all the right compromises, particularly when it comes to number
+serialization. Its syntax is super familiar too. To a first approximation, all
+developers know what a curly brace and a square bracket means.
+
+Its only shortcoming is that it is too simple to be used as a configuration file
+language. It has no comments and no verbatim multi-line strings. These are the
+"killer features" of YAML, and why YAML has taken over the configuration file
+space to date, despite its quirks.
+
+Finally, it doesn't support keywords. Using a serialization language that
+doesn't support them from a programming language that does causes friction,
+while using a serialization language that does support them from a programming
+language that doesn't feels just fine.
+
+NRDL addresses these shortcomings with its verbatim multi-line strings, hash
+line comments, and support for keywords via its symbols, while largely
+preserving its simple, ubiquitous syntax.
+
+### YAML
+
+The [YAML creators](https://yaml.org/) made something really special. Theirs was
+the first language I used which allowed me to just indent a JSON blob and have
+that document able to be passed as a verbatim string to other programs using its
+pipe multi-line strings. Kubernetes makes heavy use of this, and I can't imagine
+solving these kinds of ops problems without a language that made document
+embedding that easy. They also made a language that, in the wild, looks really
+nice, almost like I was reading a simple plain-text email.
+
+The only real shortcoming of YAML is complexity. The language is too complex to
+implement easily.  Many languages either simply import PyYAML or libyaml,
+both of which were implemented by the designers of YAML themselves, or they
+implement [a subset of YAML](https://github.com/Carleslc/Simple-YAML). They do
+this because it is very hard to implement the full parser.
+
+They can get away with this because almost no one uses all of YAML's features.
+Type tags are both useless and confusing. Typed languages don't need them; the
+type of the input values are generally known ahead of time upon deserialization.
+Untyped language parsers don't need them either. They can generally deduce the
+type based on JSON field kind.
+
+I have seen anchors and refs in the wild, but they generally just cause
+confusion and headache. They are too complicated to reason about and don't
+really solve the problem they were intended to solve.
+
+Many other minefields and problems exist because of YAML's complexity. The
+[Norway problem](https://hitchdev.com/strictyaml/why/implicit-typing-removed/),
+the [Billion Laughs](https://en.wikipedia.org/wiki/Billion_laughs_attack)
+attack, [the 63 different kinds of multi-line
+strings](https://stackoverflow.com/a/21699210). Indeed, NRDL largely agrees with
+[StrictYAML's critiques of
+YAML](https://hitchdev.com/strictyaml/why-not/ordinary-yaml/), with the
+exception that NRDL recognizes the value of providing _some_ implicit typing, at
+least insofar as that provided by JSON's types and literals.
+
+Whitespace as a structure marker is also a huge problem. [Tabs are
+forbidden](https://yaml.org/faq.html), but are indistinguishable from spaces.
+Indentation level works to a point, but if one key contains an embedded
+multi-line string and the next key at the same indentation level is off the
+page, it's very difficult without additional tooling to tell which indentation
+level to which the next key belongs. Some have jokingly resorted to using [a
+carpenter's
+square](https://salt.tips/text-editor-plugins-for-salt-states-and-yaml-jinja/)
+for this problem. This problem crops up all the time in Kubernetes manifests,
+for example.
+
+NRDL seeks to preserve the good parts of YAML -- verbatim and prose multi-line
+strings, comments, implicit typing to support dynamic languages, pleasing syntax
+with emphasis on whitespace, that "text email" feel -- without the bad parts. It
+does this by adding _just enough_ syntax to provide YAML's killer features and
+nothing else.
+
+This approach also helps NRDL achieve simplicity in parsing. Realizing that the
+viability of a technology [depends on its
+virality](https://www.dreamsongs.com/RiseOfWorseIsBetter.html), a major goal of
+NRDL is to maintain its status as [an _LL(1)_
+language](https://en.wikipedia.org/wiki/LL_parser), requiring only
+single-character lookahead in the parser implementation. The reference
+implementation of NRDL is a simple recursive-descent parser that uses
+[`peek-char`](https://www.lispworks.com/documentation/HyperSpec/Body/f_peek_c.htm)
+and
+[`read-char`](https://www.lispworks.com/documentation/HyperSpec/Body/f_rd_cha.htm).
+Most languages have these or similar. This ensures that NRDL can be read without
+any buffering, but can serialized directly. The decision of maintaining _LL(1)_
+status is a design decision that, at one stroke, drastically simplifies the
+workload of parser implementers. This solves the hampered implementation proliferation that we see with YAML.
+
+### EDN
+
+If NRDL has good looks, it's because it took them in part from
+[EDN](https://github.com/edn-format/edn). Its treatment of commas and colons as
+whitespace was, in particular, stolen outright. So also was the use of
+whitespace as delimiters, but not as structure markers. I have a lot of respect
+for Rich Hickey's ability to make code and data beautiful.
+
+However, EDN is very Clojure-centric. Both symbols and keywords are supported,
+greatly complicating the syntax without providing much usefulness. People rarely
+use the symbol feature, opting instead to serialize with keywords. Within
+keywords, only one forward slash is allowed. This is in accordance with
+Clojure's syntax, but not with other languages in the Lisp family. The `M` and
+`N` suffixes for numbers are rather JVM-specific, and pres-suppose both integer
+and floating-point types, when many languages only provide support for 64-bit
+floats, such as JavaScript and [Janet](https://janet-lang.org). The struct tags
+that EDN provides share many of the disadvantages within a configuration file
+context which YAML tags have. Finally, the syntax is very unfamiliar to most
+developers' eyes. The Lisp community is comfortable with semicolons as comment
+prefixes, but this can be jarring from other perspectives. Configuration files
+are meant to be used by a wide audience.
+
+NRDL seeks to support the Lisp family in a practical way while also ensuring
+that users of NRDL configuration files don't need to write Lisp to understand
+the file. It provides a single symbol type, corresponding to atomic strings
+commonly found in data within the Lisp family. It also respects the design
+trade-off that JSON made to just specify "numbers" and have the target language
+figure out what that means.
 
 ## ABNF
 
