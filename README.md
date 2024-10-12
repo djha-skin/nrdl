@@ -344,9 +344,6 @@ keys.
     language](https://en.wikipedia.org/wiki/LL_parser), ensuring implementation
     simplicity. It can also be mildly annoying though.
 
-## Supporting Resources
-
-Check out the [vim NRDL plugin](https://git.djha.skin/me/vim-nrdl.git).
 
 ## Acknowledgements and Comparisons
 
@@ -488,6 +485,10 @@ Here are some things I'd like to see for NRDL some day:
   Lisp implementation, but I would like to see one in C, Scheme, Janet, Elixir,
   etc. I'd be happy to add your implementation to this repository as the standard
   if you wish to implement such a parser.
+
+## Supporting Resources
+
+Check out the [vim NRDL plugin](https://github.com/djha-skin/vim-nrdl.git).
 
 ## Community
 
