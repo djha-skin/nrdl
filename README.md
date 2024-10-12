@@ -8,46 +8,9 @@ superset that was specifically written to be:
 - Good enough to replace YAML.
 - Generic enough to be useful from any programming language.
 - Featureful enough to support the functional languages, particularly those in
-  the Lisp family.
+  the Lisp family (supports keywords/symbols/atoms).
 
 **Join the [Matrix channel (`nrdl:matrix.org`)](https://matrix.to/#/!mEdAmGzxTrQPWAYdfx:matrix.org?via=matrix.org)!**
-
-## Documentation and Usage
-
-NRDL is currently only implemented in Common Lisp. I would love to change this;
-see below under the "Contributing" header.
-
-The system name is `com.djhaskin.nrdl`, as is the package name. Package-local
-nicknames is recommended.
-
-There are three functions of note: `parse-from`, `generate-to`,
-`nested-to-alist`.
-
-`parse-from` takes one argument, which is a stream, `t` or `nil`, just like
-`format`. It deserializes one NRDL value (which may be a compound value, such as
-an object) from the stream and stops parsing at the point after the object ends
-in the stream, much like `read` does. It deserializes
-objects into hash tables, arrays into lists, `true` into `t`, `false` into
-`nil`, and `null` into `cl:null`, and straight up `read`s numbers in (as long as
-they validate as valid JSON numbers).
-
-The function `generate-to` has this signature:
-
-`(generate-to strm val &key (pretty-indent 0) json-mode)`
-
-- `strm` is a stream specifier, as above
-- `val` is a hash table, sequence, boolean, number, string, keyword, or
-  any arbitrary combination of those value types.
-- `pretty-indent` is the number of spaces that should be used for each
-indentation level in a pretty-printed document. `0` means the document will not
-be pretty printed, but will be minified-ish.
-- `json-mode` is a convenience parameter. It requests that the document printed
-  out be a valid JSON document. This allows the NRDL library to be useful as
-  both a JSON and NRDL (de)serializer.
-
-The function `nested-to-alist` is a convenience function. It takes an
-arbitrarily nested structure of hash tables and sequences, and kicks them out as
-a nested structure of alists and lists instead.
 
 ## Example Document
 
@@ -118,6 +81,44 @@ a nested structure of alists and lists instead.
 }
 
 ```
+
+## Documentation and Usage
+
+NRDL is currently only implemented in Common Lisp. I would love to change this;
+see below under the "Contributing" header.
+
+The system name is `com.djhaskin.nrdl`, as is the package name. Package-local
+nicknames is recommended.
+
+There are three functions of note: `parse-from`, `generate-to`,
+`nested-to-alist`.
+
+`parse-from` takes one argument, which is a stream, `t` or `nil`, just like
+`format`. It deserializes one NRDL value (which may be a compound value, such as
+an object) from the stream and stops parsing at the point after the object ends
+in the stream, much like `read` does. It deserializes
+objects into hash tables, arrays into lists, `true` into `t`, `false` into
+`nil`, and `null` into `cl:null`, and straight up `read`s numbers in (as long as
+they validate as valid JSON numbers).
+
+The function `generate-to` has this signature:
+
+`(generate-to strm val &key (pretty-indent 0) json-mode)`
+
+- `strm` is a stream specifier, as above
+- `val` is a hash table, sequence, boolean, number, string, keyword, or
+  any arbitrary combination of those value types.
+- `pretty-indent` is the number of spaces that should be used for each
+indentation level in a pretty-printed document. `0` means the document will not
+be pretty printed, but will be minified-ish.
+- `json-mode` is a convenience parameter. It requests that the document printed
+  out be a valid JSON document. This allows the NRDL library to be useful as
+  both a JSON and NRDL (de)serializer.
+
+The function `nested-to-alist` is a convenience function. It takes an
+arbitrarily nested structure of hash tables and sequences, and kicks them out as
+a nested structure of alists and lists instead.
+
 ## Rationale
 
 This is a language I made up because I am writing a command line tool
