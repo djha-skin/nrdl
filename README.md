@@ -87,8 +87,8 @@ superset that was specifically written to be:
 NRDL is currently only implemented in Common Lisp. I would love to change this;
 see below under the "Contributing" header.
 
-The system name is `com.djhaskin.nrdl`, as is the package name. Package-local
-nicknames is recommended.
+The system name is `com.djhaskin.nrdl`, as is the package name. Using
+package-local nicknames is recommended.
 
 There are three functions of note: `parse-from`, `generate-to`,
 `nested-to-alist`.
@@ -101,7 +101,8 @@ objects into hash tables, arrays into lists, `true` into `t`, `false` into
 `nil`, and `null` into `cl:null`, and straight up `read`s numbers in (as long as
 they validate as valid JSON numbers).
 
-The function `generate-to` has this signature:
+The function `generate-to` serializes a compound data structure to a stream. It
+has this signature:
 
 `(generate-to strm val &key (pretty-indent 0) json-mode)`
 
@@ -116,7 +117,7 @@ be pretty printed, but will be minified-ish.
   both a JSON and NRDL (de)serializer.
 
 The function `nested-to-alist` is a convenience function. It takes an
-arbitrarily nested structure of hash tables and sequences, and kicks them out as
+arbitrarily nested structure of hash tables and sequences, and converts them to
 a nested structure of alists and lists instead.
 
 ## Rationale
@@ -527,7 +528,7 @@ Here are some things I'd like to see for NRDL some day:
   Lisp implementation, but I would like to see one in C, Scheme, Janet, Elixir,
   etc. I'd be happy to add your implementation to this repository as the standard
   if you wish to implement such a parser.
-* I don't use emacs, but would welcome and love a contribution for a NRDL emacs
+* I don't use Emacs, but would welcome and love a contribution for a NRDL Emacs
   plugin. The same goes for VS Code.
 
 ## Supporting Resources
