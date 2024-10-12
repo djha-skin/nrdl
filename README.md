@@ -439,9 +439,10 @@ implementation of NRDL is a simple recursive-descent parser that uses
 and
 [`read-char`](https://www.lispworks.com/documentation/HyperSpec/Body/f_rd_cha.htm).
 Most languages have these or similar. This ensures that NRDL can be read without
-any buffering, but can serialized directly. The decision of maintaining _LL(1)_
+any buffering, but can deserialized directly. The decision of maintaining _LL(1)_
 status is a design decision that, at one stroke, drastically simplifies the
-workload of parser implementers. This solves the hampered implementation proliferation that we see with YAML.
+workload of parser implementers. This aims to solve the hampered implementation
+proliferation problem that we see with YAML.
 
 ### EDN
 
@@ -470,7 +471,9 @@ that users of NRDL configuration files don't need to write Lisp to understand
 the file. It provides a single symbol type, corresponding to atomic strings
 commonly found in data within the Lisp family. It also respects the design
 trade-off that JSON made to just specify "numbers" and have the target language
-figure out what that means.
+figure out what that means. In doing these things, NRDL aims to be useful within
+the context of as many programming languages as possible, with special attention
+paid to the functional and Lisp languages.
 
 ## How to Contribute
 
@@ -485,6 +488,8 @@ Here are some things I'd like to see for NRDL some day:
   Lisp implementation, but I would like to see one in C, Scheme, Janet, Elixir,
   etc. I'd be happy to add your implementation to this repository as the standard
   if you wish to implement such a parser.
+* I don't use emacs, but would welcome and love a contribution for a NRDL emacs
+  plugin. The same goes for VS Code.
 
 ## Supporting Resources
 
