@@ -87,6 +87,9 @@ superset that was specifically written to be:
 NRDL is currently only implemented in Common Lisp. I would love to change this;
 see below under the "Contributing" header.
 
+NRDL is available as a package in the [OCICL package
+manager](https://github.com/ocicl/ocicl).
+
 The system name is `com.djhaskin.nrdl`, as is the package name. Using
 package-local nicknames is recommended.
 
