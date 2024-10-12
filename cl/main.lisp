@@ -5,11 +5,9 @@
 ;;;;
 
 #+(or)
-
 (progn
   (declaim (optimize (speed 0) (space 0) (debug 3)))
-           (asdf:load-system "alexandria")
-           (asdf:load-system "fset"))
+           (asdf:load-system "alexandria"))
 
 
 (in-package #:cl-user)
@@ -21,7 +19,6 @@
     Nestable Readable Document Language
     ")
     (:import-from #:alexandria)
-    (:import-from #:fset)
     (:export
       extraction-error
       parse-from
@@ -29,7 +26,6 @@
       nested-to-alist
       string-symbol
       symbol-string
-      to-fset
       *symbol-package*
       *symbol-deserialize-case*
       *symbol-serialize-case*))
@@ -1096,9 +1092,8 @@ other
   (cond
     ((stringp value) value)
     ((or (vectorp value) (listp value))
-     (fset:convert 'fset:seq value))
+     (map 'list #'nested-to-alist value))
     ((hash-table-p value)
-     (fset:convert 'fset:map value)
      (let ((coll
        (loop for k being the hash-key of value
            using (hash-value v)
@@ -1108,35 +1103,35 @@ other
     (t
       value)))
 
-(defun to-fset
-  (value)
-  "
-  Recursively changes value, converting all hash tables within the tree to a
-  ... Whatever.
-  "
-  (cond
-    ((stringp value) value)
-    ((vectorp value)
-     (loop with collector = (fset:empty-seq)
-           for v across value
-           do
-           (fset:push-last collector (to-fset v))
-           finally
-           (return collector)))
-    ((listp value)
-     (loop with collector = (fset:empty-seq)
-           for v in value
-           do
-           (fset:push-last collector (to-fset v))
-           finally
-           (return collector)))
-    ((hash-table-p value)
-     (loop with collector = (fset:empty-map)
-           for k being the hash-key of value
-           using (hash-value v)
-           do
-           (fset:includef collector (to-fset k) (to-fset v))
-           finally
-           (return collector)))
-    (:else
-      value)))
+;;; (defun to-fset
+;;;   (value)
+;;;   "
+;;;   Recursively changes value, converting all hash tables within the tree to a
+;;;   ... Whatever.
+;;;   "
+;;;   (cond
+;;;     ((stringp value) value)
+;;;     ((vectorp value)
+;;;      (loop with collector = (fset:empty-seq)
+;;;            for v across value
+;;;            do
+;;;            (fset:push-last collector (to-fset v))
+;;;            finally
+;;;            (return collector)))
+;;;     ((listp value)
+;;;      (loop with collector = (fset:empty-seq)
+;;;            for v in value
+;;;            do
+;;;            (fset:push-last collector (to-fset v))
+;;;            finally
+;;;            (return collector)))
+;;;     ((hash-table-p value)
+;;;      (loop with collector = (fset:empty-map)
+;;;            for k being the hash-key of value
+;;;            using (hash-value v)
+;;;            do
+;;;            (fset:includef collector (to-fset k) (to-fset v))
+;;;            finally
+;;;            (return collector)))
+;;;     (:else
+;;;       value)))
