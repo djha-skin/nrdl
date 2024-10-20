@@ -961,6 +961,7 @@ other
 
     (if (> (count-if (lambda (x)
                        (or
+                         (digit-char-p x)
                          (char= x #\Space)
                          (escapable-p x #\`)))
                      prop-content) 0)
