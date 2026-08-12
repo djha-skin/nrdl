@@ -30,9 +30,23 @@
       symbol-string
       *symbol-package*
       *symbol-deserialize-case*
-      *symbol-serialize-case*))
+      *symbol-serialize-case*
+      emit-nrdl-struct
+      inject-object))
 
 (in-package #:com.djhaskin.nrdl)
+
+(defgeneric emit-nrdl-struct (strm val pretty-indent indented-at &key json-mode)
+  (:documentation
+    "Serialize a structure to NRDL format.
+     STRM is the output stream.
+     VAL is the structure object.
+     PRETTY-INDENT controls pretty-printing depth.
+     INDENTED-AT controls current indentation level.
+     JSON-MODE controls whether to output JSON-compatible format.")
+  (:method (strm val pretty-indent indented-at &key json-mode)
+    (declare (ignore strm pretty-indent indented-at json-mode))
+    (error "No emit-nrdl-struct method defined for ~a" (type-of val))))
 
 (defconstant +eof+ :eof)
 
@@ -1077,6 +1091,10 @@ other
     (number (inject-number strm val))
     (string (inject-blob strm val indented-at :json-mode json-mode))
     (hash-table (inject-object strm val pretty-indent indented-at :json-mode json-mode))
+    (fset:wb-seq (inject-array strm (fset:convert 'list val) pretty-indent indented-at :json-mode json-mode))
+    (fset:wb-set (inject-array strm (fset:convert 'list val) pretty-indent indented-at :json-mode json-mode))
+    (fset:wb-map (inject-object strm (fset:convert 'hash-table val) pretty-indent indented-at :json-mode json-mode))
+    (structure-object (emit-nrdl-struct strm val pretty-indent indented-at :json-mode json-mode))
     (sequence (inject-array strm val pretty-indent indented-at :json-mode json-mode)))
   val)
 
