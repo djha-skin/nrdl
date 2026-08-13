@@ -19,9 +19,9 @@
 *.x86f binary
 /target/bin/nrdl binary
 
-# Lisp
-*.lisp text
-*.asd text
+# Lisp (eol=lf: CRLF checkouts break SBCL FORMATTER continuation strings)
+*.lisp text eol=lf
+*.asd text eol=lf
 *.lock text
 qlfile text
 
