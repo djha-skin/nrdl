@@ -7,32 +7,33 @@
 #+(or)
 (progn
   (declaim (optimize (speed 0) (space 0) (debug 3)))
-           (asdf:load-system "alexandria"))
+  (asdf:load-system "alexandria"))
 
 
 (in-package #:cl-user)
 
 (defpackage
-  #:com.djhaskin.nrdl (:use #:cl)
-  (:documentation
-    "
+    #:com.djhaskin.nrdl (:use #:cl)
+                        (:documentation
+                          "
     Nestable Readable Document Language
     ")
-    (:import-from #:alexandria)
-    (:import-from #:fset)
-    (:export
-      extraction-error
-      parse-from
-      generate-to
-      nested-to-alist
-      to-fset
-      string-symbol
-      symbol-string
-      *symbol-package*
-      *symbol-deserialize-case*
-      *symbol-serialize-case*
-      emit-nrdl-struct
-      inject-object))
+                        (:import-from #:alexandria)
+                        (:import-from #:fset)
+                        (:export
+                          extraction-error
+                          parse-from
+                          generate-to
+                          nested-to-alist
+                          to-fset
+                          string-symbol
+                          symbol-string
+                          *symbol-package*
+                          *symbol-deserialize-case*
+                          *symbol-serialize-case*
+                          *json-keys-as-keywords*
+                          emit-nrdl-struct
+                          inject-object))
 
 (in-package #:com.djhaskin.nrdl)
 
@@ -45,8 +46,8 @@
      INDENTED-AT controls current indentation level.
      JSON-MODE controls whether to output JSON-compatible format.")
   (:method (strm val pretty-indent indented-at &key json-mode)
-    (declare (ignore strm pretty-indent indented-at json-mode))
-    (error "No emit-nrdl-struct method defined for ~a" (type-of val))))
+           (declare (ignore strm pretty-indent indented-at json-mode))
+           (error "No emit-nrdl-struct method defined for ~a" (type-of val))))
 
 (defconstant +eof+ :eof)
 
@@ -69,15 +70,15 @@
   ((expected :initarg :expected :reader expected)
    (got :initarg :got :reader got))
   (:report
-   (lambda (c s)
-     (let* ((gotc (got c))
-            (gotc-title (nameof gotc))
-            (expected (expected c)))
-       (format s
-             "Expected ~v[nothing~;~:;one of ~]~{`~A`~^~#[~; or ~:;, ~]~}; got `~A`"
-             (length expected)
-             (mapcar #'nameof expected)
-             gotc-title)))))
+    (lambda (c s)
+      (let* ((gotc (got c))
+             (gotc-title (nameof gotc))
+             (expected (expected c)))
+        (format s
+                "Expected ~v[nothing~;~:;one of ~]~{`~A`~^~#[~; or ~:;, ~]~}; got `~A`"
+                (length expected)
+                (mapcar #'nameof expected)
+                gotc-title)))))
 
 (defun peek-chr (strm)
   (declare (type streamable strm))
@@ -138,7 +139,7 @@
     (read-from-string (build-string building) nil nil)))
 
 (defun extract-quoted
-  (strm chr quote-char)
+       (strm chr quote-char)
   (declare (type streamable strm)
            (type streamed chr)
            (type character quote-char))
@@ -150,52 +151,52 @@
                      (char/= last-read quote-char))
           do
           (if (char= last-read #\\)
-            (progn
-              (setf last-read (must-read-chr strm))
-              (cond
-                    ((eql last-read quote-char)
-                     (push quote-char building))
-                    ((char= last-read #\\)
-                     (push last-read building))
-                    ((char= last-read #\/)
-                     (push last-read building))
-                    ((char= last-read #\b)
-                     (push #\Backspace building))
-                     ((char= last-read #\f)
-                      (push #\Page building))
-                     ((char= last-read #\n)
-                      (push #\Newline building))
-                     ((char= last-read #\r)
-                      (push #\Return building))
-                     ((char= last-read #\t)
-                      (push #\Tab building))
-                     ((char= last-read #\u)
-                      (push
-                        (code-char
-                          (let ((build-ordinal (make-string 6)))
-                            (setf (elt build-ordinal 0) #\#)
-                            (setf (elt build-ordinal 1) #\X)
-                            (setf (elt build-ordinal 2) (must-read-chr strm))
-                            (setf (elt build-ordinal 3) (must-read-chr strm))
-                            (setf (elt build-ordinal 4) (must-read-chr strm))
-                            (setf (elt build-ordinal 5) (must-read-chr strm))
-                            (read-from-string build-ordinal nil nil)))
-                        building))
-                     (t (error
-                          'extraction-error
-                          :expected
-                          '(#\"
-                            #\\
-                            #\/
-                            #\b
-                            #\f
-                            #\n
-                            #\r
-                            #\t
-                            #\u)
-                          :got 
-                               last-read))))
-            (push last-read building))
+              (progn
+                (setf last-read (must-read-chr strm))
+                (cond
+                  ((eql last-read quote-char)
+                   (push quote-char building))
+                  ((char= last-read #\\)
+                   (push last-read building))
+                  ((char= last-read #\/)
+                   (push last-read building))
+                  ((char= last-read #\b)
+                   (push #\Backspace building))
+                  ((char= last-read #\f)
+                   (push #\Page building))
+                  ((char= last-read #\n)
+                   (push #\Newline building))
+                  ((char= last-read #\r)
+                   (push #\Return building))
+                  ((char= last-read #\t)
+                   (push #\Tab building))
+                  ((char= last-read #\u)
+                   (push
+                     (code-char
+                       (let ((build-ordinal (make-string 6)))
+                         (setf (elt build-ordinal 0) #\#)
+                         (setf (elt build-ordinal 1) #\X)
+                         (setf (elt build-ordinal 2) (must-read-chr strm))
+                         (setf (elt build-ordinal 3) (must-read-chr strm))
+                         (setf (elt build-ordinal 4) (must-read-chr strm))
+                         (setf (elt build-ordinal 5) (must-read-chr strm))
+                         (read-from-string build-ordinal nil nil)))
+                     building))
+                  (t (error
+                       'extraction-error
+                       :expected
+                       '(#\"
+                         #\\
+                         #\/
+                         #\b
+                         #\f
+                         #\n
+                         #\r
+                         #\t
+                         #\u)
+                       :got
+                       last-read))))
+              (push last-read building))
           (setf last-read (must-read-chr strm)))
     (build-string building)))
 
@@ -212,11 +213,11 @@
 
 (defun whitespace-p (chr)
   (declare (type character chr))
-    (or
-      (char= chr #\Newline)
-      (char= chr #\Return)
-      (char= chr #\Page)
-      (blankspace-p chr)))
+  (or
+    (char= chr #\Newline)
+    (char= chr #\Return)
+    (char= chr #\Page)
+    (blankspace-p chr)))
 
 (defun sepchar-p (chr)
   (declare (type character chr))
@@ -226,13 +227,13 @@
 
 (defun guarded-sepchar-p (chr)
   (declare (type (or null character) chr))
-    (unless (null chr)
-      (sepchar-p chr)))
+  (unless (null chr)
+    (sepchar-p chr)))
 
 (defun guarded-blankspace-p (chr)
   (declare (type (or null character) chr))
-    (unless (null chr)
-      (blankspace-p chr)))
+  (unless (null chr)
+    (blankspace-p chr)))
 
 (defun extract-comment (strm)
   (declare (type streamable strm))
@@ -251,17 +252,17 @@
            (type function pred))
   (loop with just-read = nil
         with next = chr
-    do
-    (cond
-      ((eq next +eof+)
-       (return just-read))
-      ((eql next +start-comment+)
-       (setf just-read (extract-comment strm)))
-      ((funcall pred next)
-       (setf just-read (must-read-chr strm)))
-      (t
-        (return just-read)))
-    (setf next (peek-chr strm))))
+        do
+        (cond
+          ((eq next +eof+)
+           (return just-read))
+          ((eql next +start-comment+)
+           (setf just-read (extract-comment strm)))
+          ((funcall pred next)
+           (setf just-read (must-read-chr strm)))
+          (t
+           (return just-read)))
+        (setf next (peek-chr strm))))
 
 (defun extract-list-sep (strm chr)
   (declare (type streamable strm)
@@ -324,8 +325,8 @@
                        (build-string building)))
         (setf last-read (read-chr strm))
         (if (eql chr +start-verbatim+)
-          (push last-read building)
-          (push #\Space building))
+            (push last-read building)
+            (push #\Space building))
         (let ((sep-result
                 (extract-blob-sep strm (peek-chr strm))))
           (when sep-result
@@ -345,35 +346,35 @@
 
 #+(or)
 (do
-  (string-invertcase "")
-  (string-invertcase "A")
+    (string-invertcase "")
+    (string-invertcase "A")
   (string-invertcase "a")
   (string-invertcase " ")
   (string-invertcase "my heart's a stereo")
   (string-invertcase "My heart's a stereo"))
 
 (defun string-invertcase
-  (str)
+       (str)
   (declare (type string str))
   (let ((operable (remove-if-not #'both-case-p str)))
     (if (= (length operable) 0)
-      str
-      (let* ((first-upper-case (upper-case-p (elt operable 0)))
-             (uneven-case
-               (when (> (length operable) 1)
-                      (reduce
-                        (lambda (c v)
-                          (or c v))
-                        (map
-                          'vector
-                          (lambda (x)
-                            (not (eql (upper-case-p x) first-upper-case)))
-                          (subseq operable 1))))))
-        (if uneven-case
-          str
-          (if first-upper-case
-            (string-downcase str)
-            (string-upcase str)))))))
+        str
+        (let* ((first-upper-case (upper-case-p (elt operable 0)))
+               (uneven-case
+                 (when (> (length operable) 1)
+                   (reduce
+                     (lambda (c v)
+                       (or c v))
+                     (map
+                       'vector
+                       (lambda (x)
+                         (not (eql (upper-case-p x) first-upper-case)))
+                       (subseq operable 1))))))
+          (if uneven-case
+              str
+              (if first-upper-case
+                  (string-downcase str)
+                  (string-upcase str)))))))
 
 ;;; Variable used to determine the case of a string
 ;;; used for the name of a new symbol upon deserialization.
@@ -403,7 +404,7 @@
   :downcase)
 
 (defun
-  symbol-string-prep (str case-guide)
+    symbol-string-prep (str case-guide)
   "
   Attempts to prepare a string for interning according to the normal
   ANSI rules for internment of literal symbols.
@@ -418,8 +419,15 @@
 
 (defparameter *symbol-package* (find-package :KEYWORD))
 
+;;; Variable bound by `parse-from`'s `:json-keys-as-keywords` keyword
+;;; argument. When true, string keys found in maps are interned as
+;;; keywords (via `string-symbol`) during deserialization. This allows
+;;; NRDL documents whose keys are quoted strings, such as JSON, to be
+;;; parsed into maps with keyword keys.
+(defparameter *json-keys-as-keywords* nil)
+
 (defun
-  string-symbol (str &optional (case-guide *symbol-deserialize-case*))
+    string-symbol (str &optional (case-guide *symbol-deserialize-case*))
   "
   Creates a keyword from a string.
 
@@ -441,7 +449,7 @@
     *symbol-package*))
 
 (defun symbol-string
-  (sym &optional (case-guide *symbol-serialize-case*))
+       (sym &optional (case-guide *symbol-serialize-case*))
   (declare (type symbol sym)
            (type keyword case-guide))
   (cond ((eql sym 't) "true")
@@ -481,7 +489,7 @@
 (defun convert-to-symbol (final-string)
   (declare (type string final-string))
   (cond ((string= final-string "t")
-                  t)
+         t)
         ((string= final-string "nil")
          'cl:null)
         ((string= final-string "true")
@@ -625,7 +633,13 @@
                   (read-chr strm))
         (return
           (alexandria:plist-hash-table
-            (reverse building)
+            (loop for (k v) on (reverse building) by #'cddr
+                  collect
+                  (if (and *json-keys-as-keywords*
+                           (stringp k))
+                      (string-symbol k)
+                      k)
+                  collect v)
             :test #'equal))))
 #|
 (nrdl:parse-from t)
@@ -694,10 +708,12 @@ other
 
 
 |#
-(defun parse-from (strm)
-  (declare (type streamable strm))
-  (extract-list-sep strm (peek-chr strm))
-  (extract-value strm (peek-chr strm)))
+(defun parse-from (strm &key json-keys-as-keywords)
+  (declare (type streamable strm)
+           (type boolean json-keys-as-keywords))
+  (let ((*json-keys-as-keywords* json-keys-as-keywords))
+    (extract-list-sep strm (peek-chr strm))
+    (extract-value strm (peek-chr strm))))
 
 
 
@@ -727,12 +743,12 @@ other
 (defun to-surrogates (chr)
   (declare (type streamed chr))
   (let* ((subject (char-code chr))
-      (residue (- subject #x10000))
-      (higher (prog1 (write (ash residue -10) :base 16) (terpri)))
-      (lower (prog1 (write (logand #x003ff residue) :base 16) (terpri))))
-      (list
-        (+ #xD800 higher)
-        (+ #xDc00 lower))))
+         (residue (- subject #x10000))
+         (higher (prog1 (write (ash residue -10) :base 16) (terpri)))
+         (lower (prog1 (write (logand #x003ff residue) :base 16) (terpri))))
+    (list
+      (+ #xD800 higher)
+      (+ #xDc00 lower))))
 #|
 (inject-quoted
   t
@@ -761,11 +777,11 @@ other
 
 (defparameter *escape-characters*
   '((#\Newline . #\n)
-(#\Page . #\f)
-(#\Backspace . #\b)
-(#\Return . #\r)
-(#\Tab . #\t)
-(#\\ . #\\)))
+    (#\Page . #\f)
+    (#\Backspace . #\b)
+    (#\Return . #\r)
+    (#\Tab . #\t)
+    (#\\ . #\\)))
 
 (defun inject-quoted (strm blob &optional (quote-char #\"))
   (declare (type streamable strm)
@@ -775,18 +791,18 @@ other
   (map nil (lambda (c)
              (let ((mapped-char (cdr (assoc c *escape-characters*))))
                (if mapped-char
-                 (progn
-                   (write-char #\\ strm)
-                   (write-char mapped-char strm))
-                 (cond
-                   ((unprintable-p c)
-                    (write-char #\\ strm)
-                    (write-char #\u strm)
-                    (format strm "~4,'0X" (char-code c)))
-                   ((eql c quote-char)
-                    (write-char #\\ strm)
-                    (write-char quote-char strm))
-                   (t (write-char c strm))))))
+                   (progn
+                     (write-char #\\ strm)
+                     (write-char mapped-char strm))
+                   (cond
+                     ((unprintable-p c)
+                      (write-char #\\ strm)
+                      (write-char #\u strm)
+                      (format strm "~4,'0X" (char-code c)))
+                     ((eql c quote-char)
+                      (write-char #\\ strm)
+                      (write-char quote-char strm))
+                     (t (write-char c strm))))))
        blob)
   (write-char quote-char strm)
   blob)
@@ -817,9 +833,9 @@ other
                     (< pos max-width)))
             (setf break-spot pos)
             )
-            (when (and (>= pos max-width)
-                       (not (null break-spot)))
-              (return break-spot))
+          (when (and (>= pos max-width)
+                     (not (null break-spot)))
+            (return break-spot))
           finally
           (return break-spot))))
 
@@ -834,27 +850,27 @@ other
            (type string blob)
            (type function next-spot))
   (if (<= (length blob) 0)
-    blob
-    (loop with consumed = (copy-seq blob)
-          with chunks = nil
-          for spot = (funcall next-spot max-width consumed)
-          while (and
-                  (> (length consumed) 0)
-                  (not (null spot)))
-          do
-          (push (subseq consumed 0 spot) chunks)
-          (setf consumed
-                (if (> (length consumed) (+ 1 spot))
-                  (subseq consumed (+ 1 spot))
-                  (progn
-                    ;; Demonstrate that there should be a trailing newline
-                    (push "" chunks)
-                    (copy-seq ""))))
-          finally
-          (progn
-            (when (> (length consumed) 0)
-              (push consumed chunks))
-            (return (reverse chunks))))))
+      blob
+      (loop with consumed = (copy-seq blob)
+            with chunks = nil
+            for spot = (funcall next-spot max-width consumed)
+            while (and
+                    (> (length consumed) 0)
+                    (not (null spot)))
+            do
+            (push (subseq consumed 0 spot) chunks)
+            (setf consumed
+                  (if (> (length consumed) (+ 1 spot))
+                      (subseq consumed (+ 1 spot))
+                      (progn
+                        ;; Demonstrate that there should be a trailing newline
+                        (push "" chunks)
+                        (copy-seq ""))))
+            finally
+            (progn
+              (when (> (length consumed) 0)
+                (push consumed chunks))
+              (return (reverse chunks))))))
 
 (defun inject-linesep (strm)
   (write-char #\Newline strm))
@@ -864,19 +880,19 @@ other
            (type streamable strm)
            (type (or null (integer 0 1024)) indented-at))
   (if (null indented-at)
-    (when (not json-mode)
-      (write-char #\Space strm))
-    (progn
-      (inject-linesep strm)
-      (loop for i from 1 to indented-at
-            do
-            (write-char #\Space strm)))))
+      (when (not json-mode)
+        (write-char #\Space strm))
+      (progn
+        (inject-linesep strm)
+        (loop for i from 1 to indented-at
+              do
+              (write-char #\Space strm)))))
 
 (defun suggest-line-width
-  (indented-at
-    &key
-    (break-min-width 30)
-    (doc-width 80))
+       (indented-at
+        &key
+        (break-min-width 30)
+        (doc-width 80))
   (declare
     (type (or null (integer 0 1024)) indented-at)
     (type (integer 0 1024) break-min-width)
@@ -895,40 +911,40 @@ other
            (type (or null (integer 0 1024)) line-width))
   (if (or json-mode
           (null line-width))
-    :quoted
-    (cond
-      ((> (count #\Newline blob) 0)
-       :verbatim)
-      ((and
-         (> (length blob) line-width)
-         (> (count #\Space blob) 0))
-       :prose)
-      (t
-        :quoted))))
+      :quoted
+      (cond
+        ((> (count #\Newline blob) 0)
+         :verbatim)
+        ((and
+           (> (length blob) line-width)
+           (> (count #\Space blob) 0))
+         :prose)
+        (t
+         :quoted))))
 
 (defun inject-multiline-blob
-  (strm blob indented-at line-width prefix-char next-spot)
+       (strm blob indented-at line-width prefix-char next-spot)
   (declare (type streamable strm)
            (type string blob)
            (type (integer 0 1024) indented-at)
            (type (integer 0 1024) line-width)
            (type character prefix-char)
            (type function next-spot))
-        (loop named line-printer
-              with spacious
-              for str in (break-up-blob line-width
-                                        blob
-                                        next-spot)
-              do
-              (write-char prefix-char strm)
-              (write-string str strm)
-              (inject-sep strm indented-at))
-        (write-char #\^ strm))
+  (loop named line-printer
+        with spacious
+        for str in (break-up-blob line-width
+                                  blob
+                                  next-spot)
+        do
+        (write-char prefix-char strm)
+        (write-string str strm)
+        (inject-sep strm indented-at))
+  (write-char #\^ strm))
 
 (defun inject-blob (strm blob indented-at
-                         &key
-                         json-mode
-                         line-width-args)
+                    &key
+                    json-mode
+                    line-width-args)
   (declare (type streamable strm)
            (type string blob)
            (type (or null (integer 0 1024)) indented-at)
@@ -939,21 +955,21 @@ other
                                  (cons indented-at line-width-args)))
          (dispatch (determine-blob-form blob line-suggested-width json-mode)))
     (if (eql dispatch :quoted)
-      (inject-quoted
-        strm
-        blob
-        #\")
-      (inject-multiline-blob
-        strm
-        blob
-        indented-at
-        line-suggested-width
-        (if (eql dispatch :verbatim)
-          +start-verbatim+
-          +start-prose+)
-        (if (eql dispatch :verbatim)
-                 #'blob-verbatim-break-spot
-                 #'blob-prose-break-spot)))))
+        (inject-quoted
+          strm
+          blob
+          #\")
+        (inject-multiline-blob
+          strm
+          blob
+          indented-at
+          line-suggested-width
+          (if (eql dispatch :verbatim)
+              +start-verbatim+
+              +start-prose+)
+          (if (eql dispatch :verbatim)
+              #'blob-verbatim-break-spot
+              #'blob-prose-break-spot)))))
 
 ;; The only place where I punt to the printer
 (defun inject-number (strm num)
@@ -973,16 +989,16 @@ other
   (declare (type string prop-content)
            (type boolean json-mode))
   (if json-mode
-    (inject-quoted strm prop-content #\")
+      (inject-quoted strm prop-content #\")
 
-    (if (> (count-if (lambda (x)
-                       (or
-                         (digit-char-p x)
-                         (char= x #\Space)
-                         (escapable-p x #\`)))
-                     prop-content) 0)
-      (inject-quoted strm prop-content #\`)
-      (write-string prop-content strm))))
+      (if (> (count-if (lambda (x)
+                         (or
+                           (digit-char-p x)
+                           (char= x #\Space)
+                           (escapable-p x #\`)))
+                       prop-content) 0)
+          (inject-quoted strm prop-content #\`)
+          (write-string prop-content strm))))
 #|
 (inject-symbol t :argyle)
 => [prints `argyle`]
@@ -1009,14 +1025,14 @@ other
                (symbol-string prop)
                :json-mode json-mode))
     (symbol (cond ((eql (print prop) 'cl:null)
-                        (write-string "null" strm))
+                   (write-string "null" strm))
                   (t (error
                        "Writing symbols to NRDL is undefined"))))))
 
 (defun inject-array (strm seq pretty-indent indented-at
-                          &key json-mode)
+                     &key json-mode)
   (let ((array-indent (when (not (null pretty-indent))
-                           (+ indented-at pretty-indent))))
+                        (+ indented-at pretty-indent))))
     (write-char #\[ strm)
     (loop for r = seq then (cdr r)
           for v = (car r)
@@ -1032,7 +1048,7 @@ other
   (write-char #\] strm))
 
 (defun inject-object (strm object pretty-indent indented-at &key json-mode
-                           line-width-args)
+                      line-width-args)
   (let* ((printable
            (stable-sort
              (alexandria:hash-table-alist object)
@@ -1069,11 +1085,11 @@ other
                 (inject-blob strm v blob-indent :json-mode json-mode))
               (progn
                 (if json-mode
-                  (progn
-                    (write-char #\: strm)
-                    (when pretty-indent
-                      (write-char #\Space strm)))
-                  (write-char #\Space strm))
+                    (progn
+                      (write-char #\: strm)
+                      (when pretty-indent
+                        (write-char #\Space strm)))
+                    (write-char #\Space strm))
                 (inject-value strm v pretty-indent object-indent :json-mode json-mode)
                 (when (and
                         json-mode
@@ -1105,7 +1121,7 @@ other
   (inject-value strm val pretty-indent 0 :json-mode json-mode))
 
 (defun nested-to-alist
-  (value)
+       (value)
   "
   Recursively changes value, converting all hash tables within the tree to an
   alist.
@@ -1116,16 +1132,16 @@ other
      (map 'list #'nested-to-alist value))
     ((hash-table-p value)
      (let ((coll
-       (loop for k being the hash-key of value
-           using (hash-value v)
-           collect (cons k (nested-to-alist v)))))
+             (loop for k being the hash-key of value
+                   using (hash-value v)
+                   collect (cons k (nested-to-alist v)))))
        (stable-sort coll #'string< :key (lambda (thing)
                                           (format nil "~A" (car thing))))))
     (t
-      value)))
+     value)))
 
 (defun to-fset
-  (value)
+       (value)
   "
   Recursively changes value, converting all hash tables within the tree to a
   ... Whatever.
@@ -1155,4 +1171,4 @@ other
            finally
            (return collector)))
     (:else
-      value)))
+     value)))

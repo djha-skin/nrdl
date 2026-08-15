@@ -24,7 +24,7 @@
 (defpackage #:com.djhaskin.nrdl/tests
   (:use #:cl)
   (:import-from
-    #:org.shirakumo.parachute
+      #:org.shirakumo.parachute
     #:define-test
     #:true
     #:false
@@ -37,7 +37,7 @@
     #:finish
     #:test)
   (:import-from
-    #:com.djhaskin.nrdl)
+      #:com.djhaskin.nrdl)
   (:local-nicknames
     (#:parachute #:org.shirakumo.parachute)
     (#:nrdl #:com.djhaskin.nrdl)))
@@ -114,8 +114,8 @@
   (is equal
       '((A)
         (B
-          (:DESTINATION . "yon")
-          (:ORIGIN . "thither")) (C 1 2 3 4 5))
+         (:DESTINATION . "yon")
+         (:ORIGIN . "thither")) (C 1 2 3 4 5))
       (let ((a (make-hash-table))
             (b (make-hash-table)))
         (setf (gethash :origin b) "thither")
@@ -205,16 +205,16 @@
 
 (defparameter *sparrow-alist*
   `((:|FORCE PUSH|
-                                                   . "I sing because I'm happy")
+      . "I sing because I'm happy")
     ("I am web mistress ming")
     (:OTHER . ,(format nil "~@{~A~^~%~}"
-                                                            "And I know"
-                                                            "He's watching"
-                                                            "Over me"))
+                       "And I know"
+                       "He's watching"
+                       "Over me"))
     (:POEM . ,(format nil "~@{~A~^~%~}"
-                                                           "His eyee"
-                                                           "is on"
-                                                           "The sparrow"))
+                      "His eyee"
+                      "is on"
+                      "The sparrow"))
     (:THE-SPARROWS
       . :HIS-EYE)
     (:THE-TREES)
@@ -247,31 +247,31 @@
 
 (define-test "parse: more general case"
   :parent parse-tests
-           (is equal
-                 (nrdl:nested-to-alist
-                   (with-input-from-string
-                     (strm *sparrow*)
-                     (nrdl:parse-from strm)))
-    *sparrow-alist*))
+  (is equal
+      (nrdl:nested-to-alist
+        (with-input-from-string
+            (strm *sparrow*)
+          (nrdl:parse-from strm)))
+      *sparrow-alist*))
 
 (define-test json-generate-test)
 
 (define-test "json: simple example of json"
   :parent json-generate-test
-    (is equal
-    (with-output-to-string (strm)
-      (nrdl:generate-to strm
-                        (alexandria:alist-hash-table
-                          `((:a . 1)
-                            (:b . (:x :y :z))
-                            (:c . ("food" "for" "thought"))
-                            (:d . cl:null)
-                            (:e . ,nil)
-                            (:f . t)
-                            (:g . 0.87)))
-                        :pretty-indent 4
-                        :json-mode t))
-"{
+  (is equal
+      (with-output-to-string (strm)
+        (nrdl:generate-to strm
+                          (alexandria:alist-hash-table
+                            `((:a . 1)
+                              (:b . (:x :y :z))
+                              (:c . ("food" "for" "thought"))
+                              (:d . cl:null)
+                              (:e . ,nil)
+                              (:f . t)
+                              (:g . 0.87)))
+                          :pretty-indent 4
+                          :json-mode t))
+      "{
     \"a\": 1,
     \"b\": [
         \"x\",
@@ -290,11 +290,11 @@
 }"))
 
 (defparameter *sparrow-object* (with-input-from-string
-                                  (strm *sparrow*)
-                                  (nrdl:parse-from strm)))
+                                   (strm *sparrow*)
+                                 (nrdl:parse-from strm)))
 
 (defparameter *pretty-sparrow*
-"{
+  "{
     `force push` \"I sing because I'm happy\"
     \"I am web mistress ming\" false
     other
@@ -348,9 +348,9 @@
 
 (define-test "generate: thorough example"
   :parent generate-output
-    (is equal (with-output-to-string (strm)
-      (nrdl:generate-to strm *sparrow-object* :pretty-indent 4))
-        *pretty-sparrow*))
+  (is equal (with-output-to-string (strm)
+              (nrdl:generate-to strm *sparrow-object* :pretty-indent 4))
+      *pretty-sparrow*))
 
 (defpackage #:com.djhaskin.nrdl/test-intern-package)
 
@@ -359,16 +359,16 @@
 
 (defparameter *sparrow-alist-different-package*
   `((COM.DJHASKIN.NRDL/TEST-INTERN-PACKAGE::|FORCE PUSH|
-                                                   . "I sing because I'm happy")
+      . "I sing because I'm happy")
     ("I am web mistress ming")
     (COM.DJHASKIN.NRDL/TEST-INTERN-PACKAGE::OTHER . ,(format nil "~@{~A~^~%~}"
-                                                            "And I know"
-                                                            "He's watching"
-                                                            "Over me"))
+                                                             "And I know"
+                                                             "He's watching"
+                                                             "Over me"))
     (COM.DJHASKIN.NRDL/TEST-INTERN-PACKAGE::POEM . ,(format nil "~@{~A~^~%~}"
-                                                           "His eyee"
-                                                           "is on"
-                                                           "The sparrow"))
+                                                            "His eyee"
+                                                            "is on"
+                                                            "The sparrow"))
     (COM.DJHASKIN.NRDL/TEST-INTERN-PACKAGE::THE-SPARROWS
       . COM.DJHASKIN.NRDL/TEST-INTERN-PACKAGE::HIS-EYE)
     (COM.DJHASKIN.NRDL/TEST-INTERN-PACKAGE::THE-TREES)
@@ -416,3 +416,73 @@
 ;;;     (strm *pretty-sparrow*)
 ;;;   (nrdl:to-fset
 ;;;     (nrdl:parse-from strm)))
+
+(define-test json-keys-as-keywords)
+
+(define-test "json-keys-as-keywords: keys stay strings by default"
+  :parent json-keys-as-keywords
+  (is equal
+      '(("zick"
+         ("config-files" "one" "two")
+         ("ghost-files" "three")))
+      (nrdl:nested-to-alist
+        (with-input-from-string
+            (strm "{\"zick\": {\"config-files\": [\"one\", \"two\"], \"ghost-files\": [\"three\"]}}")
+          (nrdl:parse-from strm)))))
+
+(define-test "json-keys-as-keywords: string keys become keywords when requested"
+  :parent json-keys-as-keywords
+  (is equal
+      '((:ZICK
+         (:CONFIG-FILES "one" "two")
+         (:GHOST-FILES "three")))
+      (nrdl:nested-to-alist
+        (with-input-from-string
+            (strm "{\"zick\": {\"config-files\": [\"one\", \"two\"], \"ghost-files\": [\"three\"]}}")
+          (nrdl:parse-from strm :json-keys-as-keywords t)))))
+
+(define-test "json-keys-as-keywords: nested maps inside arrays"
+  :parent json-keys-as-keywords
+  (is equal
+      '(((:A . 1)) ((:B . 2)))
+      (nrdl:nested-to-alist
+        (with-input-from-string
+            (strm "[{\"a\": 1}, {\"b\": 2}]")
+          (nrdl:parse-from strm :json-keys-as-keywords t)))))
+
+(define-test "json-keys-as-keywords: string values are unaffected"
+  :parent json-keys-as-keywords
+  (is equal
+      '((:A . "hello"))
+      (nrdl:nested-to-alist
+        (with-input-from-string
+            (strm "{\"a\": \"hello\"}")
+          (nrdl:parse-from strm :json-keys-as-keywords t)))))
+
+(define-test "json-keys-as-keywords: works on native nrdl quoted keys"
+  :parent json-keys-as-keywords
+  (is equal
+      '((:ZICK . 1))
+      (nrdl:nested-to-alist
+        (with-input-from-string
+            (strm "{\"zick\" 1}")
+          (nrdl:parse-from strm :json-keys-as-keywords t)))))
+
+(define-test "json-keys-as-keywords: bareword keys stay keywords either way"
+  :parent json-keys-as-keywords
+  (is equal
+      '((:ZICK . 1))
+      (nrdl:nested-to-alist
+        (with-input-from-string
+            (strm "{zick 1}")
+          (nrdl:parse-from strm :json-keys-as-keywords t)))))
+
+(define-test "json-keys-as-keywords: interning goes through the symbol package"
+  :parent json-keys-as-keywords
+  (is equal
+      '((COM.DJHASKIN.NRDL/TEST-INTERN-PACKAGE::ZICK . 1))
+      (nrdl:nested-to-alist
+        (with-input-from-string
+            (strm "{\"zick\" 1}")
+          (let ((nrdl:*symbol-package* *test-intern-package*))
+            (nrdl:parse-from strm :json-keys-as-keywords t))))))

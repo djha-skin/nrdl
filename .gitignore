@@ -19,6 +19,12 @@
 .*.sw[a-z]
 /.slime_paste
 
+# AI
+/.pi/**/*.jsonl
+/.pi/**/*.txt
+
+
+
 # Lisp stuff
 /com.djhaskin.nrdl
 /.repl/ros_history

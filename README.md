@@ -84,8 +84,9 @@ superset that was specifically written to be:
 
 ## Documentation and Usage
 
-NRDL is currently only implemented in Common Lisp. I would love to change this;
-see below under the "Contributing" header.
+NRDL is currently implemented in Common Lisp (the reference implementation, in
+`cl/`) and in Janet (in `janet/`, built with `jpm`). I would love to see more
+implementations; see below under the "Contributing" header.
 
 NRDL is available as a package in the [OCICL package
 manager](https://github.com/ocicl/ocicl).
@@ -96,13 +97,22 @@ package-local nicknames is recommended.
 There are three functions of note: `parse-from`, `generate-to`,
 `nested-to-alist`.
 
-`parse-from` takes one argument, which is a stream, `t` or `nil`, just like
-`format`. It deserializes one NRDL value (which may be a compound value, such as
-an object) from the stream and stops parsing at the point after the object ends
-in the stream, much like `read` does. It deserializes
+`parse-from` takes a stream, `t` or `nil`, just like `format`, plus the keyword
+argument `:json-keys-as-keywords` (default `nil`). It deserializes one NRDL
+value (which may be a compound value, such as an object) from the stream and
+stops parsing at the point after the object ends in the stream, much like
+`read` does. It deserializes
 objects into hash tables, arrays into lists, `true` into `t`, `false` into
 `nil`, and `null` into `cl:null`, and straight up `read`s numbers in (as long as
 they validate as valid JSON numbers).
+
+When `:json-keys-as-keywords` is true, any string key found in a map (as opposed
+to the bareword or backtick-quoted symbol keys NRDL already interns as
+keywords) is interned as a keyword via `string-symbol`, honoring
+`*symbol-package*` and `*symbol-deserialize-case*`. This is handy when parsing
+JSON documents, whose object keys are always strings, into maps with keyword
+keys. The same behavior is available by binding the exported special variable
+`*json-keys-as-keywords*` around the call.
 
 The function `generate-to` serializes a compound data structure to a stream. It
 has this signature:
