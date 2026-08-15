@@ -2,6 +2,31 @@
 
 * Format: "LANGUAGE VERSION"
 
+## Janet 0.1.0
+
+### Added
+
+* A Janet implementation of NRDL, in `janet/`, with the parser expressed as a
+  PEG grammar following the ABNF in the README, using Janet's built-in `peg`
+  module. `parse-from` accepts the same `:json-keys-as-keywords` keyword
+  argument as the Common Lisp implementation, so JSON documents can be parsed
+  into tables with keyword keys.
+* `generate-to` with `:pretty-indent` and `:json-mode` options, mirroring the
+  Common Lisp implementation. Since Janet tables cannot hold `nil`, parsed
+  nulls arrive as the `:null` keyword (the convention used by `spork/json`).
+* Tests in `janet/tests`, run via `jpm test`.
+
+## CL 0.8.0
+
+### Added
+
+* Added a `:json-keys-as-keywords` keyword argument to `parse-from`, and an
+  exported `*json-keys-as-keywords*` special variable it binds. When true,
+  string keys found in maps are interned as keywords (via `string-symbol`)
+  during deserialization, so JSON documents can be parsed into maps with
+  keyword keys.
+* Added tests around this.
+
 ## CL 0.4.0
 
 ### Added
