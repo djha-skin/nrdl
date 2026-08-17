@@ -12,7 +12,7 @@
 
 (declare-source
   :prefix "nrdl"
-  :source ["janet/src/main.janet"])
+  :source ["janet/src/init.janet"])
 
 # jpm's declare-project registers a default `test` task that runs
 # `run-tests` on the root `test/` directory. Our tests live in
@@ -20,4 +20,4 @@
 # (the `task` macro would only append another thunk to it).
 (def test-rule (get (dyn :rules) "test"))
 (array/clear (get test-rule :recipe))
-(array/push (get test-rule :recipe) (fn [] (run-tests "janet/tests")))
+(array/push (get test-rule :recipe) (fn [] (run-tests "janet/test")))

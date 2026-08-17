@@ -1,4 +1,4 @@
-# janet/src/main.janet
+# janet/src/init.janet
 #
 # Reference Implementation Parser for NRDL in Janet.
 #
