@@ -5,7 +5,7 @@
 (declare-project
   :name "nrdl"
   :description "Nestable Readable Document Language"
-  :version "0.1.0"
+  :version "0.1.1"
   :author "Daniel Jay Haskin"
   :license "MIT"
   :dependencies [])
