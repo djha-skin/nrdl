@@ -1,0 +1,28 @@
+{
+    "I am sysadmin": True,
+    "I am webadmin": False,
+    "force push": "I sing because I'm happy",
+    "other": "And I know\nHe's watching\nOver me",
+    "poem": "His eye\nis on\nThe sparrow",
+    "the-sparrows": "his-eye",
+    "the-trees": False,
+    "the-wind": "bullseye",
+    "this-should-still-work": 15.0,
+    "wendover": [
+        {
+            "also": -1000,
+            "and": 1.01,
+            "apparently": 10000,
+            "but": 1000,
+            "gambling": 100,
+            "much": -10,
+            "paramedics": -10000,
+            "so": 1,
+        },
+        {"a": "fire", "die": "in"},
+        15,
+        "this\nthat",
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut asdf lkjas dfd lksdf asdf aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\"",
+    ],
+    "you are so wrong": None,
+}

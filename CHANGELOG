@@ -2,6 +2,24 @@
 
 * Format: "LANGUAGE VERSION"
 
+## Python 0.1.0
+
+### Added
+
+* A Python implementation of NRDL, in `python/`, available on PyPI as `nrdl`.
+  A simple recursive-descent parser (`parse_from`) follows the ABNF in the
+  README, and a generator (`generate_to`) supports `pretty-indent` and
+  `json-mode` options.
+* Because Python has no symbol type, symbols deserialize to plain strings,
+  and `true`/`false`/`null` deserialize to `True`/`False`/`None`. When
+  serializing, dictionary keys are written as symbols (barewords or
+  backtick-quoted), while string values are written as quoted strings.
+* Tests in `python/tests`, run via `pytest`, including sample documents
+  derived from the ABNF and a round-trip of the example document.
+* Sphinx docs in `python/docs`, published on ReadTheDocs.
+* A GitHub Actions workflow (`.github/workflows/python.yml`) that publishes
+  to PyPI via trusted publishing when a `python-*` tag is pushed.
+
 ## Janet 0.1.0
 
 ### Added

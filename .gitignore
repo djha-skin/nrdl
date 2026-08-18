@@ -36,3 +36,10 @@
 .dolt/
 *.db
 .beads-credential-key
+
+# Python implementation
+/python/.venv/
+/python/dist/
+/python/src/*.egg-info/
+/python/docs/_build/
+/python/**/__pycache__/

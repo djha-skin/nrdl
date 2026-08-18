@@ -87,7 +87,8 @@ Drop us a line in the `nrdl` channel on [Libera Chat](https://web.libera.chat/).
 ## Documentation and Usage
 
 NRDL is currently implemented in Common Lisp (the reference implementation, in
-`cl/`) and in Janet (in `janet/`, built with `jpm`). I would love to see more
+`cl/`), in Janet (in `janet/`, built with `jpm`), and in Python (in `python/`,
+available on PyPI as `nrdl`). I would love to see more
 implementations; see below under the "Contributing" header.
 
 NRDL is available as a package in the [OCICL package

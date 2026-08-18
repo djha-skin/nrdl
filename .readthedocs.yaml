@@ -1,0 +1,19 @@
+# ReadTheDocs configuration for the Python implementation's docs
+# (python/docs). See https://docs.readthedocs.io/en/stable/config-file/v2.html
+
+version: 2
+
+build:
+  os: "ubuntu-22.04"
+  tools:
+    python: "3.12"
+
+sphinx:
+  configuration: python/docs/conf.py
+
+python:
+  install:
+    - method: pip
+      path: python
+      extra_requirements:
+        - docs

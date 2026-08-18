@@ -1,0 +1,5 @@
+{
+  # the wind
+  the-wind "bullseye" # and a trailing comment
+  the-trees false
+}
