@@ -1,4 +1,6 @@
+![nrdl logo](docs/assets/nrdl.png)
 # NRDL: The Nestable, Readable Document Language
+
 
 This repository houses the Nestable Readable Document Language. It is a JSON
 superset that was specifically written to be:
@@ -537,10 +539,10 @@ Here are some things I'd like to see for NRDL some day:
 
 * A logo. I am no graphic designer. If you make a logo and it looks pretty good,
   I would be happy to add it to the repo and the matrix channel.
-* Multiple implementations in multiple languages. I have implemented the Common
-  Lisp implementation, but I would like to see one in C, Scheme, Janet, Elixir,
-  etc. I'd be happy to add your implementation to this repository as the standard
-  if you wish to implement such a parser.
+* Multiple implementations in multiple languages. We have the Common
+  Lisp and Janet implementations, but I would like to see one in C, Scheme,
+  Elixir, etc. I'd be happy to add your implementation to this repository as the
+  standard if you wish to implement such a parser.
 * I don't use Emacs, but would welcome and love a contribution for a NRDL Emacs
   plugin. The same goes for VS Code.
 
