@@ -475,7 +475,9 @@ level to which the next key belongs. Some have jokingly resorted to using [a
 carpenter's
 square](https://salt.tips/text-editor-plugins-for-salt-states-and-yaml-jinja/)
 for this problem. This problem crops up all the time in Kubernetes manifests,
-for example.
+for example. Finally, the editor cannot help you indent your data. If you
+mis-indented, it will use that as vital information. The ability to select text
+and ask your editor to indent it properly is lost with this approach.
 
 NRDL seeks to preserve the good parts of YAML -- verbatim and prose multi-line
 strings, comments, implicit typing to support dynamic languages, pleasing syntax
@@ -512,7 +514,7 @@ greatly complicating the syntax without providing much usefulness. People rarely
 use the symbol feature, opting instead to serialize with keywords. Within
 keywords, only one forward slash is allowed. This is in accordance with
 Clojure's syntax, but not with other languages in the Lisp family. The `M` and
-`N` suffixes for numbers are rather JVM-specific, and pres-suppose both integer
+`N` suffixes for numbers are rather JVM-specific, and presuppose both integer
 and floating-point types, when many languages only provide support for 64-bit
 floats, such as JavaScript and [Janet](https://janet-lang.org). The struct tags
 that EDN provides share many of the disadvantages within a configuration file
@@ -537,8 +539,6 @@ would be more than happy for the help. Thanks for your consideration.
 
 Here are some things I'd like to see for NRDL some day:
 
-* A logo. I am no graphic designer. If you make a logo and it looks pretty good,
-  I would be happy to add it to the repo and the matrix channel.
 * Multiple implementations in multiple languages. We have the Common
   Lisp and Janet implementations, but I would like to see one in C, Scheme,
   Elixir, etc. I'd be happy to add your implementation to this repository as the
