@@ -3,7 +3,8 @@
 Reads NRDL documents and prints the parsed data -- re-serialized as
 NRDL by default, or as JSON with ``--json``. Documents are read from
 the named files, or from standard input when no file is given (or the
-file is ``-``).
+file is ``-``). With ``--validate``, documents are only checked for
+validity and nothing is printed.
 """
 
 from __future__ import annotations
@@ -18,6 +19,7 @@ _EPILOG = """\
 examples:
   nrdl config.nrdl          print a parsed document as NRDL
   nrdl --json config.nrdl   print a parsed document as JSON
+  nrdl --validate file.nrdl check a document without printing it
   cat config.nrdl | nrdl    read a document from standard input
 """
 
@@ -42,6 +44,11 @@ def build_parser():
         "--json",
         action="store_true",
         help="print the parsed data as JSON instead of NRDL",
+    )
+    parser.add_argument(
+        "--validate",
+        action="store_true",
+        help="check that each document parses and print nothing on success",
     )
     parser.add_argument(
         "--indent",
@@ -75,6 +82,8 @@ def main(argv=None):
             print("nrdl: %s: %s" % (name, exc), file=sys.stderr)
             status = 1
         else:
+            if args.validate:
+                continue
             kwargs = {"pretty_indent": args.indent}
             if args.json:
                 kwargs["json_mode"] = True

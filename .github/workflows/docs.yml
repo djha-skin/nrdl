@@ -1,0 +1,41 @@
+# Triggers a ReadTheDocs build of the nrdl documentation (python/docs)
+# on every push to main and on python-* release tags.
+#
+# ReadTheDocs was imported via API rather than the web UI, so no GitHub
+# webhook or GitHub App integration exists on the project. Instead, this
+# workflow pings the ReadTheDocs API v3 directly. It needs the
+# READTHEDOCS_API_KEY repository secret (the same key stored locally in
+# ~/.read-the-docs-api-key):
+#
+#   gh secret set READTHEDOCS_API_KEY
+#
+# Versions are synced first so newly pushed tags register on ReadTheDocs,
+# then the "latest" build (the default branch) is triggered.
+
+name: ReadTheDocs
+
+on:
+  push:
+    branches: [main]
+    tags: ["python-*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  trigger:
+    name: Trigger ReadTheDocs build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sync versions and trigger latest build
+        env:
+          READTHEDOCS_API_KEY: ${{ secrets.READTHEDOCS_API_KEY }}
+        run: |
+          set -eux
+          curl -fsS -X POST \
+            -H "Authorization: Token ${READTHEDOCS_API_KEY}" \
+            https://app.readthedocs.org/api/v3/projects/nrdl/sync-versions/
+          curl -fsS -X POST \
+            -H "Authorization: Token ${READTHEDOCS_API_KEY}" \
+            https://app.readthedocs.org/api/v3/projects/nrdl/versions/latest/builds/

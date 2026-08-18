@@ -68,7 +68,12 @@ $ nrdl --json config.nrdl
 }
 $ cat config.nrdl | nrdl
 ...
+$ nrdl --validate config.nrdl && echo ok
+ok
 ```
+
+`nrdl --validate` parses documents without printing them, reporting only
+problems to stderr and exiting non-zero when a document is invalid.
 
 Full documentation is available on
 [ReadTheDocs](https://nrdl.readthedocs.io/).

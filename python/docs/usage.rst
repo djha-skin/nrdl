@@ -189,6 +189,19 @@ order), or from standard input when no file is given (or the file is
 emits a compact document), and ``--version`` prints the installed
 version.
 
+``--validate`` checks documents without printing them: each document is
+parsed and only problems are reported, to standard error. The exit
+status is ``0`` when every document is valid and ``1`` otherwise, which
+makes it handy as a check in scripts:
+
+.. code-block:: console
+
+   $ nrdl --validate config.nrdl && echo ok
+   ok
+   $ nrdl --validate broken.nrdl; echo $?
+   nrdl: broken.nrdl: unexpected end of file
+   1
+
 Working with files
 ------------------
 

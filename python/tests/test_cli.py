@@ -84,4 +84,39 @@ def test_help_lists_options(capsys):
         cli.main(["--help"])
     assert exc.value.code == 0
     out = capsys.readouterr().out
-    assert "--json" in out and "--indent" in out and "FILE" in out
+    assert "--json" in out and "--indent" in out and "--validate" in out and "FILE" in out
+
+
+def test_validate_valid_document_prints_nothing(doc_file, capsys):
+    assert cli.main(["--validate", str(doc_file)]) == 0
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert captured.err == ""
+
+
+def test_validate_invalid_document_reports_to_stderr(tmp_path, capsys):
+    bad = tmp_path / "bad.nrdl"
+    bad.write_text("{a 1", encoding="utf-8")
+    assert cli.main(["--validate", str(bad)]) == 1
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "nrdl:" in captured.err
+
+
+def test_validate_reads_stdin(monkeypatch, capsys):
+    monkeypatch.setattr(sys, "stdin", io.StringIO("42 # the answer\n"))
+    assert cli.main(["--validate"]) == 0
+    assert capsys.readouterr().out == ""
+
+
+def test_validate_continues_after_error(tmp_path, capsys):
+    good = tmp_path / "good.nrdl"
+    good.write_text("1", encoding="utf-8")
+    bad = tmp_path / "bad.nrdl"
+    bad.write_text("[", encoding="utf-8")
+    assert cli.main(["--validate", str(bad), str(good)]) == 1
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "nrdl:" in captured.err
+    assert cli.main(["--validate", str(good), str(good)]) == 0
+    assert capsys.readouterr().out == ""

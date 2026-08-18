@@ -2,6 +2,26 @@
 
 * Format: "LANGUAGE VERSION"
 
+## Python 0.2.0
+
+### Added
+
+* The `nrdl` command-line tool gained a `--validate` mode: it parses each
+  document (files or standard input) and reports only errors, printing
+  nothing on success and exiting non-zero when a document is invalid.
+* The nrdl logo now appears in the ReadTheDocs documentation.
+* A GitHub Actions workflow (`.github/workflows/docs.yml`) triggers
+  ReadTheDocs builds on every push to `main` and on `python-*` tags, using
+  the `READTHEDOCS_API_KEY` repository secret.
+
+### Changed
+
+* The API was renamed to follow the `json` module's conventions: the stream
+  functions are now `load`/`dump` (file handles) and `loads`/`dumps`
+  (strings). The previous names `parse_from` and `generate_to` were removed.
+* Multi-line strings (verbatim and prose) and the command-line tool added
+  since 0.1.0 are included in this release.
+
 ## Python 0.1.0
 
 ### Added
