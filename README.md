@@ -12,6 +12,8 @@ superset that was specifically written to be:
 - Featureful enough to support the functional languages, particularly those in
   the Lisp family (it supports keywords/symbols/atoms).
 
+Drop us a line in the `nrdl` channel on [Libera Chat](https://web.libera.chat/).
+
 ## Example Document
 
 ```nrdl
