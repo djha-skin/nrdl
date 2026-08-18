@@ -12,8 +12,6 @@ superset that was specifically written to be:
 - Featureful enough to support the functional languages, particularly those in
   the Lisp family (it supports keywords/symbols/atoms).
 
-**Join the [Matrix channel (`nrdl:matrix.org`)](https://matrix.to/#/!mEdAmGzxTrQPWAYdfx:matrix.org?via=matrix.org)!**
-
 ## Example Document
 
 ```nrdl
