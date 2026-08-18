@@ -151,6 +151,34 @@ Because NRDL is a JSON superset, ``parse_from`` can parse JSON documents
 directly, so ``generate_to(..., json_mode=True)`` plus ``parse_from``
 round-trips JSON.
 
+Command line
+------------
+
+The package installs a ``nrdl`` command that reads NRDL documents and
+prints the parsed data -- as NRDL by default, or as JSON with
+``--json``:
+
+.. code-block:: console
+
+   $ nrdl config.nrdl
+   {
+       the-wind "bullseye"
+   }
+   $ nrdl --json config.nrdl
+   {
+       "the-wind": "bullseye"
+   }
+   $ nrdl --indent 0 config.nrdl
+   {the-wind "bullseye"}
+   $ cat config.nrdl | nrdl
+   ...
+
+Documents are read from the named files (multiple files are parsed in
+order), or from standard input when no file is given (or the file is
+``-``). ``--indent N`` sets the indentation width (default 4; ``0``
+emits a compact document), and ``--version`` prints the installed
+version.
+
 Round trips
 -----------
 

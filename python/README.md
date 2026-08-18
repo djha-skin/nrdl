@@ -41,5 +41,23 @@ and `true`/`false`/`null` deserialize to `True`/`False`/`None`. When
 serializing, dictionary keys are written as symbols while string values are
 written as quoted strings.
 
+## Command line
+
+The package also installs an `nrdl` command that parses documents and prints
+the parsed data, as NRDL by default or as JSON with `--json`:
+
+```console
+$ nrdl config.nrdl
+{
+    the-wind "bullseye"
+}
+$ nrdl --json config.nrdl
+{
+    "the-wind": "bullseye"
+}
+$ cat config.nrdl | nrdl
+...
+```
+
 Full documentation is available on
 [ReadTheDocs](https://nrdl.readthedocs.io/).

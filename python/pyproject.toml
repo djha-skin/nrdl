@@ -24,6 +24,9 @@ classifiers = [
 dev = ["pytest", "build"]
 docs = ["sphinx"]
 
+[project.scripts]
+nrdl = "nrdl.cli:main"
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/nrdl"]
 
