@@ -110,6 +110,31 @@ Pass ``pretty_indent`` to indent nested structures:
 
 The default ``pretty_indent=0`` produces a compact document.
 
+Multi-line strings
+~~~~~~~~~~~~~~~~~~
+
+When pretty-printing, long strings are written using NRDL's multi-line
+string forms instead of quoted strings:
+
+- A string containing **newlines** is written as a **verbatim** block
+  (``|``-prefixed lines whose newlines are preserved), and
+- a string that is **too long for its line and contains spaces** is
+  written as a **prose** block (``>``-prefixed lines whose line feeds
+  fold into single spaces).
+
+Both forms end with a caret ``^``:
+
+.. code-block:: python
+
+   >>> nrdl.generate_to({"poem": "His eye\nis on"}, pretty_indent=4)
+   '{\n    poem\n        |His eye\n        |is on\n        ^\n}'
+   >>> nrdl.generate_to("x" * 40 + " " + "y" * 40, pretty_indent=4)
+   '>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n>yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy\n^'
+
+Because NRDL is a JSON superset, the block forms parse right back into
+the original strings, so round trips are unaffected. Minified output
+(``pretty_indent=0``) and ``json_mode`` always use quoted strings.
+
 JSON mode
 ~~~~~~~~~
 

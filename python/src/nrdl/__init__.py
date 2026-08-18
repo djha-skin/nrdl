@@ -365,7 +365,7 @@ class _Writer:
                 raise ValueError("NRDL does not define Infinity or NaN")
             self.out.append(repr(v))
         elif isinstance(v, str):
-            self.quoted(v)
+            self.blob(v, indent)
         elif isinstance(v, dict):
             self.object(v, indent)
         elif isinstance(v, (list, tuple)):
@@ -391,6 +391,14 @@ class _Writer:
             if self.pretty or i > 0:
                 self.sep(indent + self.pretty)
             self.key(k, indent + self.pretty)
+            if isinstance(v, str) and self.pretty and not self.json:
+                # A long string is written as a multi-line blob on its
+                # own line, indented one level deeper than the key.
+                blob_indent = indent + 2 * self.pretty
+                if self.blob_form(v, blob_indent) != "quoted":
+                    self.sep(blob_indent)
+                    self.blob(v, blob_indent)
+                    continue
             if self.json:
                 self.out.append(":")
                 if self.pretty:
@@ -448,6 +456,77 @@ class _Writer:
         if not s or not _Parser.is_bareword_start(s[0]):
             return False
         return all(_Parser.is_bareword_middle(c) for c in s)
+
+    def blob_form(self, s, indent):
+        """Decide how to serialize a string: quoted, verbatim, or prose.
+
+        Multi-line output is only used when pretty-printing; minified
+        and json-mode documents always use quoted strings. A string
+        containing newlines becomes a verbatim block, and a string too
+        long for its line that contains spaces becomes a prose block.
+        """
+        if self.json or not self.pretty:
+            return "quoted"
+        if "\n" in s:
+            if "\r" not in s and self._blob_chars_ok(s):
+                return "verbatim"
+            return "quoted"
+        if len(s) > self.line_width(indent) and " " in s and self._blob_chars_ok(s):
+            return "prose"
+        return "quoted"
+
+    @staticmethod
+    def _blob_chars_ok(s):
+        """True if every character may appear in a multi-line line."""
+        return all(c == "\n" or c == "\t" or ord(c) >= 0x20 for c in s)
+
+    def line_width(self, indent):
+        """Suggested width for wrapping a blob at the given indentation."""
+        return min(max(80 - (indent + 1), 30), 80)
+
+    def blob(self, s, indent):
+        form = self.blob_form(s, indent)
+        if form == "verbatim":
+            self.verbatim(s, indent)
+        elif form == "prose":
+            self.prose(s, indent)
+        else:
+            self.quoted(s)
+
+    def verbatim(self, s, indent):
+        """Write a string as a verbatim multi-line block ending in `^`."""
+        for line in s.split("\n"):
+            self.out.append("|")
+            self.out.append(line)
+            self.sep(indent)
+        self.out.append("^")
+
+    def prose(self, s, indent):
+        """Write a long string as a prose block folded at spaces."""
+        width = self.line_width(indent)
+        for chunk in self._prose_chunks(s, width):
+            self.out.append(">")
+            self.out.append(chunk)
+            self.sep(indent)
+        self.out.append("^")
+
+    @staticmethod
+    def _prose_chunks(s, width):
+        """Split ``s`` at spaces so joining the chunks with a single space
+        reconstructs ``s`` exactly (the space at each split point is
+        dropped and replaced by the fold space)."""
+        chunks = []
+        start = 0
+        n = len(s)
+        while n - start > width:
+            window = s[start : start + width + 1]
+            spot = window.rfind(" ")
+            if spot < 0:
+                break  # no space to fold at; keep the rest on one line
+            chunks.append(s[start : start + spot])
+            start = start + spot + 1
+        chunks.append(s[start:])
+        return chunks
 
     def quoted(self, s):
         """Write a string as a double-quoted string with escapes."""
