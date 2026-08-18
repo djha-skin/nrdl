@@ -30,9 +30,9 @@ Quick start
 .. code-block:: python
 
    >>> import nrdl
-   >>> doc = nrdl.parse_from('{the-wind "bullseye" the-trees false}')
+   >>> doc = nrdl.loads('{the-wind "bullseye" the-trees false}')
    {'the-wind': 'bullseye', 'the-trees': False}
-   >>> nrdl.generate_to(doc, pretty_indent=4)
+   >>> nrdl.dumps(doc, pretty_indent=4)
    '{\\n    the-trees false\\n    the-wind "bullseye"\\n}'
 
 Contents

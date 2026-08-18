@@ -29,12 +29,12 @@ def sample_pairs():
 def test_sample_parses(nrdl_path, expected_path):
     text = nrdl_path.read_text(encoding="utf-8")
     expected = ast.literal_eval(expected_path.read_text(encoding="utf-8"))
-    assert nrdl.parse_from(text) == expected
+    assert nrdl.loads(text) == expected
 
 
 @pytest.mark.parametrize("nrdl_path, expected_path", sample_pairs())
 def test_sample_round_trips(nrdl_path, expected_path):
     """Parsing, serializing, and parsing again yields the same value."""
     text = nrdl_path.read_text(encoding="utf-8")
-    value = nrdl.parse_from(text)
-    assert nrdl.parse_from(nrdl.generate_to(value)) == value
+    value = nrdl.loads(text)
+    assert nrdl.loads(nrdl.dumps(value)) == value

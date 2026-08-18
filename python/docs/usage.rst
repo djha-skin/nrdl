@@ -1,21 +1,30 @@
 Usage
 =====
 
-Deserializing: ``parse_from``
------------------------------
+Deserializing: ``loads`` and ``load``
+--------------------------------------
 
-``nrdl.parse_from(text)`` reads one NRDL value from a string and returns
-it as Python data:
+``nrdl.loads(text)`` reads one NRDL value from a string and returns it
+as Python data:
 
 .. code-block:: python
 
    >>> import nrdl
-   >>> nrdl.parse_from("15")
+   >>> nrdl.loads("15")
    15
-   >>> nrdl.parse_from('[1 "two" three true null]')
+   >>> nrdl.loads('[1 "two" three true null]')
    [1, 'two', 'three', True, None]
-   >>> nrdl.parse_from('{a {b [1 2 3]}}')
+   >>> nrdl.loads('{a {b [1 2 3]}}')
    {'a': {'b': [1, 2, 3]}}
+
+``nrdl.load(fh)`` is the file-handle counterpart: it reads one NRDL
+value from any text-mode file-like object, for example an open file or
+``sys.stdin``:
+
+.. code-block:: python
+
+   >>> with open("config.nrdl", encoding="utf-8") as fh:
+   ...     config = nrdl.load(fh)
 
 The mapping between NRDL values and Python values is:
 
@@ -45,21 +54,22 @@ strings:
 
 .. code-block:: python
 
-   >>> nrdl.parse_from("the-wind")
+   >>> nrdl.loads("the-wind")
    'the-wind'
-   >>> nrdl.parse_from("\`force push\`")
+   >>> nrdl.loads("\`force push\`")
    'force push'
 
 The three JSON literals are the exception: the symbols ``true``,
 ``false``, and ``null`` (bareword or backtick-quoted) deserialize to
 ``True``, ``False``, and ``None``, for JSON backwards compatibility.
 
-Serializing: ``generate_to``
-----------------------------
+Serializing: ``dump`` and ``dumps``
+-----------------------------------
 
-``nrdl.generate_to(value)`` serializes a Python value into an NRDL
-document and returns it as a string. Dictionaries, lists, tuples,
-strings, numbers, booleans, and ``None`` are supported.
+``nrdl.dumps(value)`` serializes a Python value into an NRDL document
+and returns it as a string. ``nrdl.dump(value, fh)`` writes the same
+document to a text-mode file handle instead. Dictionaries, lists,
+tuples, strings, numbers, booleans, and ``None`` are supported.
 
 Object keys are written as symbols
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -70,7 +80,7 @@ documents readable:
 
 .. code-block:: python
 
-   >>> nrdl.generate_to({"the-wind": "bullseye"})
+   >>> nrdl.dumps({"the-wind": "bullseye"})
    '{the-wind "bullseye"}'
 
 A key that cannot be a bareword (for example, one containing spaces) is
@@ -78,7 +88,7 @@ written as a backtick-quoted symbol:
 
 .. code-block:: python
 
-   >>> nrdl.generate_to({"force push": "I sing"})
+   >>> nrdl.dumps({"force push": "I sing"})
    '{\`force push\` "I sing"}'
 
 Keys that would not survive the trip as symbols -- the empty string and
@@ -87,7 +97,7 @@ strings instead:
 
 .. code-block:: python
 
-   >>> nrdl.generate_to({"true": 1, "": 2})
+   >>> nrdl.dumps({"true": 1, "": 2})
    '{"true" 1, "" 2}'
 
 String *values*, on the other hand, are always written as quoted
@@ -95,7 +105,7 @@ strings, since there is no way in Python to mark a value as a symbol:
 
 .. code-block:: python
 
-   >>> nrdl.generate_to({"his-eye": "a fire"})
+   >>> nrdl.dumps({"his-eye": "a fire"})
    '{his-eye "a fire"}'
 
 Pretty printing
@@ -105,7 +115,7 @@ Pass ``pretty_indent`` to indent nested structures:
 
 .. code-block:: python
 
-   >>> nrdl.generate_to({"a": {"b": 1}}, pretty_indent=4)
+   >>> nrdl.dumps({"a": {"b": 1}}, pretty_indent=4)
    '{\\n    a {\\n        b 1\\n    }\\n}'
 
 The default ``pretty_indent=0`` produces a compact document.
@@ -126,9 +136,9 @@ Both forms end with a caret ``^``:
 
 .. code-block:: python
 
-   >>> nrdl.generate_to({"poem": "His eye\nis on"}, pretty_indent=4)
+   >>> nrdl.dumps({"poem": "His eye\nis on"}, pretty_indent=4)
    '{\n    poem\n        |His eye\n        |is on\n        ^\n}'
-   >>> nrdl.generate_to("x" * 40 + " " + "y" * 40, pretty_indent=4)
+   >>> nrdl.dumps("x" * 40 + " " + "y" * 40, pretty_indent=4)
    '>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n>yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy\n^'
 
 Because NRDL is a JSON superset, the block forms parse right back into
@@ -144,12 +154,12 @@ separates items:
 
 .. code-block:: python
 
-   >>> nrdl.generate_to({"a": 1, "b": [1, 2]}, json_mode=True)
+   >>> nrdl.dumps({"a": 1, "b": [1, 2]}, json_mode=True)
    '{"a":1,"b":[1,2]}'
 
-Because NRDL is a JSON superset, ``parse_from`` can parse JSON documents
-directly, so ``generate_to(..., json_mode=True)`` plus ``parse_from``
-round-trips JSON.
+Because NRDL is a JSON superset, ``loads`` can parse JSON documents
+directly, so ``dumps(..., json_mode=True)`` plus ``loads`` round-trips
+JSON.
 
 Command line
 ------------
@@ -179,6 +189,23 @@ order), or from standard input when no file is given (or the file is
 emits a compact document), and ``--version`` prints the installed
 version.
 
+Working with files
+------------------
+
+``load`` and ``dump`` read from and write to file handles, so documents
+can be read and written without ever materializing them as strings:
+
+.. code-block:: python
+
+   >>> with open("config.nrdl", encoding="utf-8") as fh:
+   ...     config = nrdl.load(fh)
+   >>> with open("config.out.nrdl", "w", encoding="utf-8") as fh:
+   ...     nrdl.dump(config, fh, pretty_indent=4)
+
+``loads`` and ``dumps`` are the string counterparts: ``loads(text)`` is
+``load(io.StringIO(text))``, and ``dumps(value, ...)`` writes ``dump``
+into a fresh ``io.StringIO`` and returns its contents.
+
 Round trips
 -----------
 
@@ -187,12 +214,12 @@ loss (modulo key order and comments, which are not part of the data):
 
 .. code-block:: python
 
-   >>> value = nrdl.parse_from("""
+   >>> value = nrdl.loads("""
    ... {
    ...     the-wind "bullseye"
    ...     the-trees false
    ...     wendover [1 2 3]
    ... }
    ... """)
-   >>> value == nrdl.parse_from(nrdl.generate_to(value))
+   >>> value == nrdl.loads(nrdl.dumps(value))
    True

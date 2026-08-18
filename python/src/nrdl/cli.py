@@ -59,13 +59,6 @@ def build_parser():
     return parser
 
 
-def _read_input(path):
-    if path is None or path == "-":
-        return sys.stdin.read()
-    with open(path, encoding="utf-8") as fh:
-        return fh.read()
-
-
 def main(argv=None):
     parser = build_parser()
     args = parser.parse_args(argv)
@@ -74,16 +67,21 @@ def main(argv=None):
     status = 0
     for path in args.files or [None]:
         name = path if path not in (None, "-") else "<stdin>"
+        fh = None
         try:
-            value = nrdl.parse_from(_read_input(path))
+            fh = sys.stdin if path in (None, "-") else open(path, encoding="utf-8")
+            value = nrdl.load(fh)
         except (nrdl.NrdlError, OSError) as exc:
             print("nrdl: %s: %s" % (name, exc), file=sys.stderr)
             status = 1
-            continue
-        kwargs = {"pretty_indent": args.indent}
-        if args.json:
-            kwargs["json_mode"] = True
-        print(nrdl.generate_to(value, **kwargs))
+        else:
+            kwargs = {"pretty_indent": args.indent}
+            if args.json:
+                kwargs["json_mode"] = True
+            print(nrdl.dumps(value, **kwargs))
+        finally:
+            if fh is not None and fh is not sys.stdin:
+                fh.close()
     return status
 
 

@@ -6,10 +6,12 @@ multi-line strings (``|`` verbatim and ``>`` prose blocks terminated by
 Commas and colons are treated as whitespace. See the repository README
 for the language specification and ABNF.
 
-This module provides two functions:
+The API follows the ``json`` module's conventions:
 
-* :func:`parse_from` -- deserialize an NRDL document into Python data.
-* :func:`generate_to` -- serialize Python data into an NRDL document.
+* :func:`load` deserializes one NRDL value from a file handle.
+* :func:`loads` deserializes one NRDL value from a string.
+* :func:`dump` serializes Python data to a file handle as NRDL.
+* :func:`dumps` serializes Python data to an NRDL string.
 
 Because Python has no symbol type, NRDL symbols deserialize to plain
 strings. The three JSON literals ``true``, ``false``, and ``null``
@@ -21,9 +23,10 @@ strings.
 
 from __future__ import annotations
 
+import io
 import re
 
-__all__ = ["NrdlError", "parse_from", "generate_to"]
+__all__ = ["NrdlError", "load", "loads", "dump", "dumps"]
 
 
 class NrdlError(ValueError):
@@ -66,16 +69,34 @@ _BAREWORD_START = frozenset(
 _BAREWORD_MIDDLE = _BAREWORD_START | frozenset("0123456789+->.")
 
 
-def parse_from(text):
-    """Deserialize one NRDL value from ``text`` and return it as Python data.
+def load(fh):
+    """Deserialize one NRDL value from the file handle ``fh`` and return it.
 
     Objects become dictionaries, arrays become lists, numbers become
     ``int``/``float``, quoted strings become strings, and symbols become
     plain strings. The symbols ``true``, ``false``, and ``null`` become
     ``True``, ``False``, and ``None``.
 
-    Raises :class:`NrdlError` if ``text`` is not a single valid NRDL value.
+    ``fh`` must be a text-mode file-like object with a ``read`` method,
+    for example the result of ``open(path, encoding="utf-8")`` or an
+    ``io.StringIO``. The whole document is read and must contain a
+    single NRDL value.
+
+    Raises :class:`NrdlError` if the document is not a single valid
+    NRDL value.
     """
+    return _parse(fh.read())
+
+
+def loads(text):
+    """Deserialize one NRDL value from the string ``text`` and return it.
+
+    Equivalent to ``load(io.StringIO(text))``; see :func:`load`.
+    """
+    return load(io.StringIO(text))
+
+
+def _parse(text):
     parser = _Parser(text)
     parser.skip_sep()
     value = parser.value()
@@ -307,8 +328,8 @@ class _Parser:
         return _LITERALS.get(name, name)
 
 
-def generate_to(value, pretty_indent=0, json_mode=False):
-    """Serialize ``value`` into an NRDL document and return it as a string.
+def dump(value, fh, pretty_indent=0, json_mode=False):
+    """Serialize ``value`` into an NRDL document, writing it to ``fh``.
 
     ``value`` may be any combination of dictionaries, lists, tuples,
     strings, numbers, booleans, and ``None``. Dictionaries become NRDL
@@ -316,17 +337,34 @@ def generate_to(value, pretty_indent=0, json_mode=False):
     arrays; strings become quoted strings; ``True``, ``False``, and
     ``None`` become ``true``, ``false``, and ``null``.
 
+    ``fh`` must be a text-mode file-like object with a ``write`` method,
+    for example the result of ``open(path, "w", encoding="utf-8")`` or
+    an ``io.StringIO``.
+
     ``pretty_indent`` is the number of spaces used for each level of
     indentation; ``0`` emits a compact document. ``json_mode`` emits a
     valid JSON document instead (string keys, colons, and commas).
 
-    Raises :class:`TypeError` for unsupported value types.
+    Returns ``None``. Raises :class:`TypeError` for unsupported value
+    types and :class:`ValueError` for a negative ``pretty_indent`` or a
+    non-finite float.
     """
     if pretty_indent < 0:
         raise ValueError("pretty_indent must be >= 0")
     writer = _Writer(pretty_indent, json_mode)
     writer.value(value, 0)
-    return "".join(writer.out)
+    fh.write("".join(writer.out))
+
+
+def dumps(value, pretty_indent=0, json_mode=False):
+    """Serialize ``value`` into an NRDL document and return it as a string.
+
+    Equivalent to writing ``dump(value, fh, ...)`` into a fresh
+    ``io.StringIO`` and returning its contents; see :func:`dump`.
+    """
+    buf = io.StringIO()
+    dump(value, buf, pretty_indent=pretty_indent, json_mode=json_mode)
+    return buf.getvalue()
 
 
 class _Writer:

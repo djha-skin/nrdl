@@ -39,12 +39,12 @@ CASES = [
 
 @pytest.mark.parametrize("value", CASES, ids=repr)
 def test_round_trip(value):
-    assert nrdl.parse_from(nrdl.generate_to(value)) == value
+    assert nrdl.loads(nrdl.dumps(value)) == value
 
 
 @pytest.mark.parametrize("value", CASES, ids=repr)
 def test_round_trip_pretty(value):
-    assert nrdl.parse_from(nrdl.generate_to(value, pretty_indent=4)) == value
+    assert nrdl.loads(nrdl.dumps(value, pretty_indent=4)) == value
 
 
 def _json_round_trippable(value):
@@ -66,12 +66,12 @@ JSON_CASES = [c for c in CASES if _json_round_trippable(c)]
 
 @pytest.mark.parametrize("value", JSON_CASES, ids=repr)
 def test_round_trip_json_mode(value):
-    assert nrdl.parse_from(nrdl.generate_to(value, json_mode=True)) == value
+    assert nrdl.loads(nrdl.dumps(value, json_mode=True)) == value
 
 
 def test_example_document_round_trips():
     text = (__import__("pathlib").Path(__file__).parent / "samples" / "example.nrdl").read_text()
-    value = nrdl.parse_from(text)
-    assert nrdl.parse_from(nrdl.generate_to(value)) == value
-    assert nrdl.parse_from(nrdl.generate_to(value, pretty_indent=4)) == value
-    assert nrdl.parse_from(nrdl.generate_to(value, json_mode=True)) == value
+    value = nrdl.loads(text)
+    assert nrdl.loads(nrdl.dumps(value)) == value
+    assert nrdl.loads(nrdl.dumps(value, pretty_indent=4)) == value
+    assert nrdl.loads(nrdl.dumps(value, json_mode=True)) == value

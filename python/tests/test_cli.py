@@ -19,9 +19,9 @@ def doc_file(tmp_path):
 
 def test_prints_parsed_document_as_nrdl(doc_file, capsys):
     status = cli.main([str(doc_file)])
-    value = nrdl.parse_from(doc_file.read_text(encoding="utf-8"))
+    value = nrdl.loads(doc_file.read_text(encoding="utf-8"))
     assert status == 0
-    assert capsys.readouterr().out == nrdl.generate_to(value, pretty_indent=4) + "\n"
+    assert capsys.readouterr().out == nrdl.dumps(value, pretty_indent=4) + "\n"
 
 
 def test_json_flag_prints_valid_json(doc_file, capsys):

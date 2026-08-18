@@ -14,25 +14,36 @@ pip install nrdl
 
 ## Usage
 
+The API follows the `json` module's conventions: `load`/`dump` work with
+file handles, and `loads`/`dumps` work with strings.
+
 ```python
 import nrdl
 
-# Deserialize an NRDL document into Python data.
-doc = nrdl.parse_from("""
+# Deserialize an NRDL document from a string.
+doc = nrdl.loads("""
 {
     the-wind "bullseye"
     the-trees false
     the-sparrows his-eye
 }
 """)
-# -> {"the-wind": "bullseye", "the-trees": False, "the-sparrows": "his-eye"}
+# -> {"the-wind": "bullseye", "the-trees": false, "the-sparrows": "his-eye"}
+
+# Or from a file handle.
+with open("config.nrdl", encoding="utf-8") as fh:
+    doc = nrdl.load(fh)
 
 # Serialize Python data back to NRDL.
-nrdl.generate_to(doc, pretty_indent=4)
+nrdl.dumps(doc, pretty_indent=4)
 # -> '{\n    the-sparrows "his-eye"\n    the-trees false\n    the-wind "bullseye"\n}'
 
+# Write it to a file handle.
+with open("config.out.nrdl", "w", encoding="utf-8") as fh:
+    nrdl.dump(doc, fh, pretty_indent=4)
+
 # Emit a JSON document instead.
-nrdl.generate_to(doc, json_mode=True)
+nrdl.dumps(doc, json_mode=True)
 # -> '{"the-sparrows": "his-eye", "the-trees": false, "the-wind": "bullseye"}'
 ```
 
